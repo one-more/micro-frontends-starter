@@ -227,7 +227,10 @@ const routes = {
     }
 }
 
-render(routes)
+render(
+    document.getElementById("app"),
+    routes
+)
 ````
 
 matching path patterns
@@ -315,8 +318,8 @@ interface Slots {
 }
 
 interface RouterImplementation {
-    getState(path: string, routes) => RouterParams,
-    render(layout: Component, slots: Slots) => void
+    navigate(path: string, routes) => RouterParams,
+    render(target: HTMLElement, layout: Component, slots: Slots) => void
 }
 ````
 
@@ -325,8 +328,8 @@ changing implementation
 import {changeRouterImplemenation} from "muskot-router"
 
 const myImplementation = {
-    getState(path, routes) => {...},
-    render(layout, slots) => {...}
+    navigate(path, routes) => {...},
+    render(target, layout, slots) => {...}
 }
 
 changeRouterImplemenation(myImplamentation)
