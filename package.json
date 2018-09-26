@@ -1,0 +1,27 @@
+{
+  "name": "muskot",
+  "version": "1.0.0",
+  "description": "the most minimalistic js framework",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/one-more/muskot.git"
+  },
+  "keywords": [
+    "framework",
+    "js",
+    "router",
+    "store",
+    "single",
+    "store"
+  ],
+  "author": "one-more",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/one-more/muskot/issues"
+  },
+  "homepage": "https://github.com/one-more/muskot#readme"
+}
