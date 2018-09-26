@@ -12,7 +12,7 @@ Let's get starting writing components
 ### render
 Simple template literals with some handy event handling spicing
 ````es6
-import {Component} from "muskot"
+import {Component, registerComponent} from "muskot"
 
 export default class MyComponent extends Component {
     greet = () => {
@@ -27,33 +27,11 @@ export default class MyComponent extends Component {
         `
     }
 }
+
+registerComponent('my-component', MyComponent);
 ````
 
-### web component's name
-to register web component class name will be used, so `MyComponent` will be 
-registered as `my-component`; it's possible to set web component's name
-explicitly by adding name prop
-````es6
-import {Component} from "muskot"
-
-export default class MyComponent extends Component {
-    get name() {
-        return 'foo-component'
-    }
-    
-    greet = () => {
-        alert("Hello world!")
-    }
-    
-    render() {
-        return `
-            <button onClick=${this.greet} >
-                greet the world
-            </div>
-        `
-    }
-}
-````
+it's important to register every component by registerComponent function
 
 ### shadow dom
 There is simple boolean flag that indicates whether create shadow root or not.
@@ -95,6 +73,7 @@ interface Reducer {
 interface Store {
     registerReducer(key: string, reducer: Reducer) => void,
     removeReducer(key: string) => boolean,
+    subscribe(key: string, cb: Function) => {unsubscribe: Function}
 }
 ````
 
@@ -272,21 +251,21 @@ to add another implementation it has to implement following interface
 interface StoreImplementation {
     addReducer(key: string, reducer: Reducer) => void,
     removeReducer(key: string) => boolean,
-    subscribe(key: string) => { unsubscribe: Function }
+    subscribe(key: string, cb: Function) => { unsubscribe: Function }
 }
 ````
 
 changing implementation
 ````es6
-import {changeImplementation} from "muskot-store"
+import {changeStoreImplementation} from "muskot"
 
 const myImplemetation = {
-    addReducer(key, reducer) => {...},
-    removeReducer(key) => {...},
-    subscribe(key) => {...}
+    addReducer(key, reducer) {...},
+    removeReducer(key) {...},
+    subscribe(key, cb) {...}
 }
 
-changeImplementation(myImplementation)
+changeStoreImplementation(myImplementation)
 ````
 
 ### replace web components implementation
@@ -303,10 +282,18 @@ changing implementation
 import {changeWebComponentsImplemenation} from "muskot"
 
 const myImplementation = {
-    registerComponent(name, component) => {...}
+    registerComponent(name, component) {...}
 }
 
 changeWebComponentsImplemenation(myImplamentation)
+````
+replace web components ready check
+````es6
+import {changeWebComponentsReadyCheck} from "muskot"
+
+const myImplementation = () => new Promise(...)
+
+changeWebComponentsReadyCheck(myImplementation)
 ````
 
 ### replace router implementation
@@ -328,8 +315,8 @@ changing implementation
 import {changeRouterImplemenation} from "muskot-router"
 
 const myImplementation = {
-    navigate(path, routes) => {...},
-    render(target, layout, slots) => {...}
+    navigate(path, routes) {...},
+    render(target, layout, slots) {...}
 }
 
 changeRouterImplemenation(myImplamentation)
