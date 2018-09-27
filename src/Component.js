@@ -1,14 +1,25 @@
 // @flow
 
-import {subscribe} from "./store"
+import {subscribe, getState} from "./store"
 
 function render() {
-    if (this.isShadow) {
-        const shadowRoot = this.attachShadow({mode: 'open'});
-        shadowRoot.innerHTML = this.render()
-    } else {
-        this.innerText = this.render()
+    if (this.isShadow && !this.shadowRoot) {
+        this.attachShadow({mode: 'open'});
     }
+    if (this.isShadow) {
+        (this.shadowRoot: any).innerHTML = this.render()
+    }
+    else {
+        this.innerHTML = this.render()
+    }
+}
+
+function parseAttributes(attributes: NamedNodeMap): Object {
+    const result = {};
+    for (const attribute of attributes) {
+        result[attribute.name] = attribute.value;
+    }
+    return result;
 }
 
 export default class Component extends HTMLElement {
@@ -21,12 +32,21 @@ export default class Component extends HTMLElement {
     }
 
     get props() {
-        return this.attributes
+        return {
+            ...this.__defaultProps,
+            ...parseAttributes(this.attributes),
+        }
+    }
+
+    set props(props: Object) {
+        this.__defaultProps = props;
     }
 
     get keys() {
         return []
     }
+
+    __defaultProps = {};
 
     subscriptions = [];
 
@@ -35,21 +55,32 @@ export default class Component extends HTMLElement {
     constructor() {
         super();
 
-        render.call(this);
+        this.subscribeToStore();
+        if (this.shadowRoot) {
+            render.call(this);
+        }
     }
 
     render() {
         return ''
     }
 
-    connectedCallback() {
+    subscribeToStore() {
         for (const key of this.keys) {
             this.subscriptions.push(
                 subscribe(key, state => {
                     this.state[key] = state;
                     render.call(this)
                 })
-            )
+            );
+            this.state[key] = getState(key);
+        }
+    }
+
+    connectedCallback() {
+        this.subscribeToStore();
+        if (!this.shadowRoot) {
+            render.call(this)
         }
 
         this.connected()
@@ -68,6 +99,9 @@ export default class Component extends HTMLElement {
     disconnected() {}
 
     adoptedCallback() {
+        this.subscribeToStore();
+        render.call(this);
+
         this.adopted()
     }
 
@@ -79,7 +113,8 @@ export default class Component extends HTMLElement {
                 ...this.props,
                 [attributeName]: newValue,
             }
-        )
+        );
+        render.call(this)
     }
 
     propsChanged(newProps: Object) {}

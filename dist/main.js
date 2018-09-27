@@ -61,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -74,8 +74,52 @@ module.exports =
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+var stubImplementation = {
+    addReducer: function addReducer(key, reducer) {},
+    removeReducer: function removeReducer(key) {
+        return false;
+    },
+    subscribe: function subscribe(key, cb) {
+        return {
+            unsubscribe: function unsubscribe() {}
+        };
+    },
+    getState: function getState(key) {}
+};
 
-var _webComponents = __webpack_require__(1);
+var store = {
+    currentImplementation: stubImplementation
+};
+
+var setImplementation = exports.setImplementation = function setImplementation(implementation) {
+    store.currentImplementation = implementation;
+};
+
+var registerReducer = exports.registerReducer = function registerReducer(key, reducer) {
+    store.currentImplementation.addReducer(key, reducer);
+};
+var removeReducer = exports.removeReducer = function removeReducer(key) {
+    store.currentImplementation.removeReducer(key);
+};
+var subscribe = exports.subscribe = function subscribe(key, cb) {
+    return store.currentImplementation.subscribe(key, cb);
+};
+var getState = exports.getState = function getState(key) {
+    return store.currentImplementation.getState(key);
+};
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _webComponents = __webpack_require__(2);
 
 Object.defineProperty(exports, "changeWebComponentsImplemenation", {
     enumerable: true,
@@ -102,7 +146,40 @@ Object.defineProperty(exports, "registerComponent", {
     }
 });
 
-var _Component = __webpack_require__(3);
+var _store = __webpack_require__(0);
+
+Object.defineProperty(exports, "changeStoreImplementation", {
+    enumerable: true,
+    get: function get() {
+        return _store.setImplementation;
+    }
+});
+Object.defineProperty(exports, "registerReducer", {
+    enumerable: true,
+    get: function get() {
+        return _store.registerReducer;
+    }
+});
+Object.defineProperty(exports, "removeReducer", {
+    enumerable: true,
+    get: function get() {
+        return _store.removeReducer;
+    }
+});
+Object.defineProperty(exports, "subscribe", {
+    enumerable: true,
+    get: function get() {
+        return _store.subscribe;
+    }
+});
+Object.defineProperty(exports, "getState", {
+    enumerable: true,
+    get: function get() {
+        return _store.getState;
+    }
+});
+
+var _Component = __webpack_require__(4);
 
 Object.defineProperty(exports, "Component", {
     enumerable: true,
@@ -114,7 +191,7 @@ Object.defineProperty(exports, "Component", {
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -146,7 +223,7 @@ var currentReadyCheck = function currentReadyCheck() {
         return Promise.resolve();
     }
     return new Promise() < null > function (resolve) {
-        __webpack_require__(2).then(function () {
+        __webpack_require__(3).then(function () {
             window.addEventListener('WebComponentsReady', resolve);
         });
     };
@@ -163,7 +240,7 @@ var setReadyCheck = exports.setReadyCheck = function setReadyCheck(readyCheck) {
 exports.default = registerComponent;
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 (function(){
@@ -209,7 +286,7 @@ var Z=window.customElements;if(!Z||Z.forcePolyfill||"function"!=typeof Z.define|
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -224,6 +301,8 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _store = __webpack_require__(0);
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -258,12 +337,44 @@ var _fixBabelExtend = function (O) {
 }(Object);
 
 function render() {
-    if (this.isShadow) {
-        var shadowRoot = this.attachShadow({ mode: 'open' });
-        shadowRoot.innerHTML = this.render();
-    } else {
-        this.innerText = this.render();
+    if (this.isShadow && !this.shadowRoot) {
+        this.attachShadow({ mode: 'open' });
     }
+    if (this.isShadow) {
+        this.shadowRoot.innerHTML = this.render();
+    } else {
+        this.innerHTML = this.render();
+    }
+}
+
+function parseAttributes(attributes) {
+    var result = {};
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = attributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var attribute = _step.value;
+
+            result[attribute.name] = attribute.value;
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+
+    return result;
 }
 
 var Component = _fixBabelExtend(function (_HTMLElement) {
@@ -282,7 +393,15 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: 'props',
         get: function get() {
-            return this.attributes;
+            return _extends({}, this.__defaultProps, parseAttributes(this.attributes));
+        },
+        set: function set(props) {
+            this.__defaultProps = props;
+        }
+    }, {
+        key: 'keys',
+        get: function get() {
+            return [];
         }
     }]);
 
@@ -291,7 +410,15 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
 
         var _this = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
 
-        render.call(_this);
+        _this.__defaultProps = {};
+        _this.subscriptions = [];
+        _this.state = {};
+
+
+        _this.subscribeToStore();
+        if (_this.shadowRoot) {
+            render.call(_this);
+        }
         return _this;
     }
 
@@ -301,8 +428,51 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
             return '';
         }
     }, {
+        key: 'subscribeToStore',
+        value: function subscribeToStore() {
+            var _this2 = this;
+
+            var _loop = function _loop(key) {
+                _this2.subscriptions.push((0, _store.subscribe)(key, function (state) {
+                    _this2.state[key] = state;
+                    render.call(_this2);
+                }));
+                _this2.state[key] = (0, _store.getState)(key);
+            };
+
+            var _iteratorNormalCompletion2 = true;
+            var _didIteratorError2 = false;
+            var _iteratorError2 = undefined;
+
+            try {
+                for (var _iterator2 = this.keys[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                    var key = _step2.value;
+
+                    _loop(key);
+                }
+            } catch (err) {
+                _didIteratorError2 = true;
+                _iteratorError2 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                        _iterator2.return();
+                    }
+                } finally {
+                    if (_didIteratorError2) {
+                        throw _iteratorError2;
+                    }
+                }
+            }
+        }
+    }, {
         key: 'connectedCallback',
         value: function connectedCallback() {
+            this.subscribeToStore();
+            if (!this.shadowRoot) {
+                render.call(this);
+            }
+
             this.connected();
         }
     }, {
@@ -311,6 +481,31 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: 'disconnectedCallback',
         value: function disconnectedCallback() {
+            var _iteratorNormalCompletion3 = true;
+            var _didIteratorError3 = false;
+            var _iteratorError3 = undefined;
+
+            try {
+                for (var _iterator3 = this.subscriptions[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                    var subscription = _step3.value;
+
+                    subscription.unsubscribe();
+                }
+            } catch (err) {
+                _didIteratorError3 = true;
+                _iteratorError3 = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                        _iterator3.return();
+                    }
+                } finally {
+                    if (_didIteratorError3) {
+                        throw _iteratorError3;
+                    }
+                }
+            }
+
             this.disconnected();
         }
     }, {
@@ -319,6 +514,9 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: 'adoptedCallback',
         value: function adoptedCallback() {
+            this.subscribeToStore();
+            render.call(this);
+
             this.adopted();
         }
     }, {
@@ -328,6 +526,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
         key: 'attributeChangedCallback',
         value: function attributeChangedCallback(attributeName, oldValue, newValue) {
             this.propsChanged(_extends({}, this.props, _defineProperty({}, attributeName, newValue)));
+            render.call(this);
         }
     }, {
         key: 'propsChanged',

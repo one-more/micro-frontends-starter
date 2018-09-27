@@ -10,10 +10,11 @@ interface Reducer {
 interface Store {
     addReducer(key: string, reducer: Reducer): void,
     removeReducer(key: string): boolean,
-    subscribe(key: string, cb: Function): {unsubscribe: Function}
+    subscribe(key: string, cb: Function): {unsubscribe: Function},
+    getState(key: string): any
 }
 
-let currentImplementation: Store = {
+const stubImplementation: Store = {
     addReducer(key: string, reducer: Reducer) {},
     removeReducer(key: string) {
         return false;
@@ -22,19 +23,27 @@ let currentImplementation: Store = {
         return {
             unsubscribe() {}
         }
-    }
+    },
+    getState(key: string) {}
+};
+
+const store = {
+    currentImplementation: stubImplementation
 };
 
 export const setImplementation = (implementation: Store) => {
-    currentImplementation = implementation
+    store.currentImplementation = implementation
 };
 
 export const registerReducer = (key: string, reducer: Reducer) => {
-    currentImplementation.addReducer(key, reducer)
+    store.currentImplementation.addReducer(key, reducer)
 };
 export const removeReducer = (key: string) => {
-    currentImplementation.removeReducer(key)
+    store.currentImplementation.removeReducer(key)
 };
 export const subscribe = (key: string, cb: Function) => {
-    return currentImplementation.subscribe(key, cb)
+    return store.currentImplementation.subscribe(key, cb)
+};
+export const getState = (key: string) => {
+    return store.currentImplementation.getState(key)
 };

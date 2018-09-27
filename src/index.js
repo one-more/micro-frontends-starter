@@ -11,7 +11,8 @@ export {
     setImplementation as changeStoreImplementation,
     registerReducer,
     removeReducer,
-    subscribe
+    subscribe,
+    getState
 } from "./store"
 
 export {default as Component} from "./Component"

@@ -1,8 +1,10 @@
-export const store = {
-    reducers: {},
-    actions: {},
-    listeners: {},
-    addReducer(key: string, reducer) {
+import {changeStoreImplementation} from "../dist/main"
+
+class Store {
+    reducers = {};
+    actions = {};
+    listeners = {};
+    addReducer = (key: string, reducer) => {
         this.reducers[key] = reducer.state;
         const actions = reducer.actions;
         for (const i in actions) {
@@ -23,20 +25,30 @@ export const store = {
             }
         }
         this.actions[key] = actions;
-    },
-    removeReducer(key: string) {
+    };
+    removeReducer = (key: string) => {
         delete this.reducers[key];
         delete this.actions[key];
-    },
-    subscribe(key: string, cb: Function) {
+    };
+    subscribe = (key: string, cb: Function) => {
         if (!this.listeners[key]) {
             this.listeners[key] = []
         }
         this.listeners[key].push(cb);
         return {
-            unsubscribe() {
+            unsubscribe: () => {
                 this.listeners[key] = this.listeners[key].filter(el => el !== cb)
             }
         }
-    }
-};
+    };
+    getState = (key: string) => {
+        return {
+            ...this.reducers[key],
+            ...this.actions[key]
+        }
+    };
+}
+
+const store = new Store();
+
+changeStoreImplementation(store);

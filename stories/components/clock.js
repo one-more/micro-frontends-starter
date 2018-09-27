@@ -1,16 +1,36 @@
-import {Component, registerComponent} from "../../dist/main";
+import {Component, registerComponent, registerReducer} from "../../dist/main";
+
+const dateStr = () => `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
+
+const reducer = {
+    state: {
+        time: dateStr()
+    },
+    actions: {
+        update() {
+            return {
+                time: dateStr()
+            }
+        }
+    }
+};
+
+const KEY = "clock";
 
 export default class Clock extends Component {
     static get name() {
-        return 'clock';
+        return `x-${KEY}`;
     }
 
     get keys() {
-        return [Clock.name]
+        return [KEY]
     }
 
     connected() {
-        this.interval = setInterval();
+        this.interval = setInterval(
+            this.state.clock.update,
+            1000,
+        );
     }
 
     disconnected() {
@@ -19,9 +39,11 @@ export default class Clock extends Component {
 
     render() {
         return `
-            <div>${this.state.clock}</div>
+            <div>${this.state.clock.time}</div>
         `
     }
 }
+
+registerReducer(KEY, reducer);
 
 registerComponent(Clock.name, Clock);

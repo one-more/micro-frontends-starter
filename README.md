@@ -73,7 +73,8 @@ interface Reducer {
 interface Store {
     registerReducer(key: string, reducer: Reducer) => void,
     removeReducer(key: string) => boolean,
-    subscribe(key: string, cb: Function) => {unsubscribe: Function}
+    subscribe(key: string, cb: Function) => {unsubscribe: Function},
+    getState(key: string) => void
 }
 ````
 
@@ -251,7 +252,8 @@ to add another implementation it has to implement following interface
 interface StoreImplementation {
     addReducer(key: string, reducer: Reducer) => void,
     removeReducer(key: string) => boolean,
-    subscribe(key: string, cb: Function) => { unsubscribe: Function }
+    subscribe(key: string, cb: Function) => { unsubscribe: Function },
+    getState(key: string) => void
 }
 ````
 
@@ -262,7 +264,8 @@ import {changeStoreImplementation} from "muskot"
 const myImplemetation = {
     addReducer(key, reducer) {...},
     removeReducer(key) {...},
-    subscribe(key, cb) {...}
+    subscribe(key, cb) {...},
+    getState(key) {...}
 }
 
 changeStoreImplementation(myImplementation)
