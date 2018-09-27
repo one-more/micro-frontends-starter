@@ -1,5 +1,3 @@
-import {changeStoreImplementation} from "../dist/main"
-
 class Store {
     reducers = {};
     actions = {};
@@ -49,6 +47,4 @@ class Store {
     };
 }
 
-const store = new Store();
-
-changeStoreImplementation(store);
+export const store = new Store();

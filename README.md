@@ -12,7 +12,7 @@ Let's get starting writing components
 ### render
 Simple template literals with some handy event handling spicing
 ````es6
-import {Component, registerComponent} from "muskot"
+import {Component, registerComponent, html} from "muskot"
 
 export default class MyComponent extends Component {
     greet = () => {
@@ -20,7 +20,7 @@ export default class MyComponent extends Component {
     }
     
     render() {
-        return `
+        return html`
             <button onClick=${this.greet} >
                 greet the world
             </div>
@@ -37,7 +37,7 @@ it's important to register every component by registerComponent function
 There is simple boolean flag that indicates whether create shadow root or not.
 shadow root itself is accessible as `this.shadowRoot` 
 ````es6
-import {Component} from "muskot"
+import {Component, html} from "muskot"
 
 export default class MyComponent extends Component {
     get isShadow() {
@@ -49,7 +49,7 @@ export default class MyComponent extends Component {
     }
     
     render() {
-        return `
+        return html`
             <button onClick=${this.greet} >
                 greet the world
             </div>
@@ -74,7 +74,8 @@ interface Store {
     registerReducer(key: string, reducer: Reducer) => void,
     removeReducer(key: string) => boolean,
     subscribe(key: string, cb: Function) => {unsubscribe: Function},
-    getState(key: string) => void
+    getState(key: string) => void,
+    migrate(newStore: Store) => Store
 }
 ````
 
@@ -90,7 +91,7 @@ interface ComponentState {
 
 Declaring state and connecting component to store.
 ````es6
-import {Component} from "muskot"
+import {Component, html} from "muskot"
 import {registerReducer} from "muskot-store"
 
 const reducer = {
@@ -136,7 +137,7 @@ export default class MyComponent extends Component {
     }
     
     render() {
-        return `
+        return html`
             <div>
                 ${this.state.myKey.map(this.renderItem)}
             </div>
@@ -253,7 +254,8 @@ interface StoreImplementation {
     addReducer(key: string, reducer: Reducer) => void,
     removeReducer(key: string) => boolean,
     subscribe(key: string, cb: Function) => { unsubscribe: Function },
-    getState(key: string) => void
+    getState(key: string) => void,
+    migrate(newStore: Store) => Store
 }
 ````
 
@@ -265,7 +267,8 @@ const myImplemetation = {
     addReducer(key, reducer) {...},
     removeReducer(key) {...},
     subscribe(key, cb) {...},
-    getState(key) {...}
+    getState(key) {...},
+    migrate(newStore) {...}
 }
 
 changeStoreImplementation(myImplementation)

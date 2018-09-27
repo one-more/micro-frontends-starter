@@ -15,4 +15,9 @@ export {
     getState
 } from "./store"
 
+export {
+    default as html,
+    addTemplateHandler
+} from "./tag"
+
 export {default as Component} from "./Component"

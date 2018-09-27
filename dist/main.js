@@ -75,16 +75,64 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var stubImplementation = {
-    addReducer: function addReducer(key, reducer) {},
+    reducers: {},
+    subscriptions: {},
+    addReducer: function addReducer(key, reducer) {
+        this.reducers[key] = reducer;
+    },
     removeReducer: function removeReducer(key) {
+        delete this.reducers[key];
         return false;
     },
     subscribe: function subscribe(key, cb) {
+        var _this = this;
+
+        if (!this.subscriptions[key]) {
+            this.subscriptions[key] = [];
+        }
+        this.subscriptions[key].push(cb);
         return {
-            unsubscribe: function unsubscribe() {}
+            unsubscribe: function unsubscribe() {
+                _this.subscriptions[key] = _this.subscriptions[key].filter(function (el) {
+                    return el !== cb;
+                });
+            }
         };
     },
-    getState: function getState(key) {}
+    getState: function getState(key) {},
+    migrate: function migrate(newStore) {
+        for (var _key in this.reducers) {
+            var _reducer = this.reducers[_key];
+            newStore.addReducer(_key, _reducer);
+        }
+        for (var _key2 in this.subscriptions) {
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = this.subscriptions[_key2][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var subscription = _step.value;
+
+                    newStore.subscribe(_key2, subscription);
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+        }
+        return newStore;
+    }
 };
 
 var store = {
@@ -92,7 +140,7 @@ var store = {
 };
 
 var setImplementation = exports.setImplementation = function setImplementation(implementation) {
-    store.currentImplementation = implementation;
+    store.currentImplementation = store.currentImplementation.migrate(implementation);
 };
 
 var registerReducer = exports.registerReducer = function registerReducer(key, reducer) {
@@ -176,6 +224,21 @@ Object.defineProperty(exports, "getState", {
     enumerable: true,
     get: function get() {
         return _store.getState;
+    }
+});
+
+var _tag = __webpack_require__(5);
+
+Object.defineProperty(exports, "html", {
+    enumerable: true,
+    get: function get() {
+        return _interopRequireDefault(_tag).default;
+    }
+});
+Object.defineProperty(exports, "addTemplateHandler", {
+    enumerable: true,
+    get: function get() {
+        return _tag.addTemplateHandler;
     }
 });
 
@@ -337,14 +400,19 @@ var _fixBabelExtend = function (O) {
 }(Object);
 
 function render() {
-    if (this.isShadow && !this.shadowRoot) {
-        this.attachShadow({ mode: 'open' });
-    }
-    if (this.isShadow) {
-        this.shadowRoot.innerHTML = this.render();
-    } else {
-        this.innerHTML = this.render();
-    }
+    var _this = this;
+
+    setTimeout(function () {
+        if (_this.isShadow && !_this.shadowRoot) {
+            _this.attachShadow({ mode: 'open' });
+        }
+        var render = _this.render();
+        if (_this.isShadow) {
+            _this.shadowRoot.innerHTML = render;
+        } else {
+            _this.innerHTML = render;
+        }
+    });
 }
 
 function parseAttributes(attributes) {
@@ -408,18 +476,18 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     function Component() {
         _classCallCheck(this, Component);
 
-        var _this = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
+        var _this2 = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
 
-        _this.__defaultProps = {};
-        _this.subscriptions = [];
-        _this.state = {};
+        _this2.__defaultProps = {};
+        _this2.subscriptions = [];
+        _this2.state = {};
 
 
-        _this.subscribeToStore();
-        if (_this.shadowRoot) {
-            render.call(_this);
+        _this2.subscribeToStore();
+        if (_this2.isShadow) {
+            render.call(_this2);
         }
-        return _this;
+        return _this2;
     }
 
     _createClass(Component, [{
@@ -430,14 +498,14 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: 'subscribeToStore',
         value: function subscribeToStore() {
-            var _this2 = this;
+            var _this3 = this;
 
             var _loop = function _loop(key) {
-                _this2.subscriptions.push((0, _store.subscribe)(key, function (state) {
-                    _this2.state[key] = state;
-                    render.call(_this2);
+                _this3.subscriptions.push((0, _store.subscribe)(key, function (state) {
+                    _this3.state[key] = state;
+                    render.call(_this3);
                 }));
-                _this2.state[key] = (0, _store.getState)(key);
+                _this3.state[key] = (0, _store.getState)(key);
             };
 
             var _iteratorNormalCompletion2 = true;
@@ -469,7 +537,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
         key: 'connectedCallback',
         value: function connectedCallback() {
             this.subscribeToStore();
-            if (!this.shadowRoot) {
+            if (!this.isShadow) {
                 render.call(this);
             }
 
@@ -537,6 +605,86 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
 }(HTMLElement));
 
 exports.default = Component;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+exports.default = html;
+exports.addTemplateHandler = addTemplateHandler;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EventHandlers = function () {
+    function EventHandlers() {
+        _classCallCheck(this, EventHandlers);
+
+        this.targetNo = 0;
+
+        window.muskotListeners = {};
+    }
+
+    _createClass(EventHandlers, [{
+        key: "register",
+        value: function register(event, fn) {
+            for (var i in window.muskotListeners) {
+                var listener = window.muskotListeners[i];
+                if (listener === fn) {
+                    return "on" + event + "=\"muskotListeners[" + i + "]()\"";
+                }
+            }
+            window.muskotListeners[this.targetNo] = fn;
+            return "on" + event + "=\"muskotListeners[" + this.targetNo++ + "]()\"";
+        }
+    }]);
+
+    return EventHandlers;
+}();
+
+var eventHandlers = new EventHandlers();
+
+var handlers = [function (raw, args) {
+    return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, function (match, event, index) {
+        return eventHandlers.register(event.toLowerCase(), args[index]);
+    });
+}];
+
+function html(strings) {
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+    }
+
+    if (!args.length) {
+        return strings[0];
+    }
+
+    var ARG = "__ARG__";
+    var acc = "";
+    for (var i = 0; i < strings.length; i++) {
+        acc += strings[i];
+        if (i < strings.length - 1) {
+            acc += ARG + i;
+        }
+    }
+    return handlers.reduce(function (str, next) {
+        return next(str, args);
+    }, acc).replace(/__ARG__(\d)/g, function (match, index) {
+        return String(args[index]);
+    });
+}
+
+function addTemplateHandler(fn) {
+    handlers.push(fn);
+}
 
 /***/ })
 /******/ ]);

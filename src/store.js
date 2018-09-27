@@ -11,20 +11,44 @@ interface Store {
     addReducer(key: string, reducer: Reducer): void,
     removeReducer(key: string): boolean,
     subscribe(key: string, cb: Function): {unsubscribe: Function},
-    getState(key: string): any
+    getState(key: string): any,
+    migrate(newStore: Store): Store
 }
 
 const stubImplementation: Store = {
-    addReducer(key: string, reducer: Reducer) {},
+    reducers: {},
+    subscriptions: {},
+    addReducer(key: string, reducer: Reducer) {
+        this.reducers[key] = reducer;
+    },
     removeReducer(key: string) {
+        delete this.reducers[key];
         return false;
     },
     subscribe(key: string, cb: Function) {
+        if (!this.subscriptions[key]) {
+            this.subscriptions[key] = [];
+        }
+        this.subscriptions[key].push(cb);
         return {
-            unsubscribe() {}
+            unsubscribe: () => {
+                this.subscriptions[key] = this.subscriptions[key].filter(el => el !== cb)
+            }
         }
     },
-    getState(key: string) {}
+    getState(key: string) {},
+    migrate(newStore: Store) {
+        for (const key in this.reducers) {
+            const reducer = this.reducers[key];
+            newStore.addReducer(key, reducer);
+        }
+        for (const key in this.subscriptions) {
+            for (const subscription of this.subscriptions[key]) {
+                newStore.subscribe(key, subscription)
+            }
+        }
+        return newStore;
+    }
 };
 
 const store = {
@@ -32,7 +56,7 @@ const store = {
 };
 
 export const setImplementation = (implementation: Store) => {
-    store.currentImplementation = implementation
+    store.currentImplementation = store.currentImplementation.migrate(implementation)
 };
 
 export const registerReducer = (key: string, reducer: Reducer) => {

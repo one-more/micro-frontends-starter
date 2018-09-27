@@ -3,15 +3,18 @@
 import {subscribe, getState} from "./store"
 
 function render() {
-    if (this.isShadow && !this.shadowRoot) {
-        this.attachShadow({mode: 'open'});
-    }
-    if (this.isShadow) {
-        (this.shadowRoot: any).innerHTML = this.render()
-    }
-    else {
-        this.innerHTML = this.render()
-    }
+    setTimeout(() => {
+        if (this.isShadow && !this.shadowRoot) {
+            this.attachShadow({mode: 'open'});
+        }
+        const render = this.render();
+        if (this.isShadow) {
+            (this.shadowRoot: any).innerHTML = render
+        }
+        else {
+            this.innerHTML = render
+        }
+    })
 }
 
 function parseAttributes(attributes: NamedNodeMap): Object {
@@ -56,7 +59,7 @@ export default class Component extends HTMLElement {
         super();
 
         this.subscribeToStore();
-        if (this.shadowRoot) {
+        if (this.isShadow) {
             render.call(this);
         }
     }
@@ -79,7 +82,7 @@ export default class Component extends HTMLElement {
 
     connectedCallback() {
         this.subscribeToStore();
-        if (!this.shadowRoot) {
+        if (!this.isShadow) {
             render.call(this)
         }
 
