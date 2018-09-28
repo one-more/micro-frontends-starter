@@ -61,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -166,8 +166,148 @@ var getState = exports.getState = function getState(key) {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.default = html;
+exports.addTemplateHandler = addTemplateHandler;
+exports.accessHandler = accessHandler;
+exports.unloadHandler = unloadHandler;
+exports.setEventsHandler = setEventsHandler;
+exports.unloadEvents = unloadEvents;
 
-var _webComponents = __webpack_require__(2);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EventsTagHandler = function EventsTagHandler() {
+    var _this = this;
+
+    _classCallCheck(this, EventsTagHandler);
+
+    this.targetNo = 0;
+
+    this.registerEvent = function (event, fn) {
+        for (var i in window.muskotListeners) {
+            var listener = window.muskotListeners[i];
+            if (listener === fn) {
+                return "on" + event + "=\"muskotListeners[" + i + "]()\"";
+            }
+        }
+        window.muskotListeners[_this.targetNo] = fn;
+        return "on" + event + "=\"muskotListeners[" + _this.targetNo++ + "]()\"";
+    };
+
+    this.call = function (raw, args) {
+        return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, function (match, event, index) {
+            return _this.registerEvent(event.toLowerCase(), args[index]);
+        });
+    };
+
+    this.unloadEvents = function (component) {
+        var root = component;
+        if (component.shadowRoot) {
+            root = component.shadowRoot;
+        }
+        var match = void 0;
+        var regExp = /muskotListeners\[(\d+?)\]/g;
+        var str = root.innerHTML;
+        var removeIndexes = {};
+        while (match = regExp.exec(str)) {
+            removeIndexes[match[1]] = true;
+        }
+        window.muskotListeners = window.muskotListeners.filter(function (el, i) {
+            return !removeIndexes[i];
+        });
+        _this.targetNo = window.muskotListeners.length;
+    };
+
+    window.muskotListeners = [];
+};
+
+var MapHandler = {
+    call: function call(raw, args) {
+        return raw.replace(/<(\w+)\s+(.*)map="(__ARG__(\d+))"(.*)>([\s\S]*)<\/\1>/gm, function (match, tag, attributes, arg, arrIndex) {
+            var arr = args[arrIndex];
+            var template = match.replace(/map=".*"/, '');
+            return arr.map(function (el) {
+                return template.replace(/__ARG__(\d+)/g, function (match, index) {
+                    var fn = args[index];
+                    if (typeof fn === "function") return fn(el);
+                    return fn;
+                });
+            });
+        });
+    }
+};
+
+var coreHandlers = {
+    events: new EventsTagHandler(),
+    map: MapHandler
+};
+
+var customHandlers = {};
+
+var handlers = [coreHandlers.map.call, coreHandlers.events.call];
+
+function html(strings) {
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
+    }
+
+    if (!args.length) {
+        return strings[0];
+    }
+
+    var ARG = "__ARG__";
+    var acc = "";
+    for (var i = 0; i < strings.length; i++) {
+        acc += strings[i];
+        if (i < strings.length - 1) {
+            acc += ARG + i;
+        }
+    }
+    return handlers.reduce(
+    // $FlowFixMe
+    function (str, next) {
+        return next(str, args);
+    }, acc).replace(/__ARG__(\d)/g, function (match, index) {
+        return String(args[index]);
+    });
+}
+
+function addTemplateHandler(key, handler) {
+    customHandlers[key] = handler;
+    // $FlowFixMe
+    handlers.unshift(handler.call);
+}
+
+function accessHandler(key) {
+    return customHandlers[key];
+}
+
+function unloadHandler(key) {
+    var handler = customHandlers[key];
+    handlers = handlers.filter(function (el) {
+        return el !== handler.call;
+    });
+}
+
+function setEventsHandler(handler) {
+    coreHandlers.events = handler;
+}
+
+function unloadEvents(component) {
+    coreHandlers.events.unloadEvents(component);
+}
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _webComponents = __webpack_require__(3);
 
 Object.defineProperty(exports, "changeWebComponentsImplemenation", {
     enumerable: true,
@@ -227,7 +367,7 @@ Object.defineProperty(exports, "getState", {
     }
 });
 
-var _tag = __webpack_require__(5);
+var _tag = __webpack_require__(1);
 
 Object.defineProperty(exports, "html", {
     enumerable: true,
@@ -260,7 +400,7 @@ Object.defineProperty(exports, "accessHandler", {
     }
 });
 
-var _Component = __webpack_require__(4);
+var _Component = __webpack_require__(5);
 
 Object.defineProperty(exports, "Component", {
     enumerable: true,
@@ -272,7 +412,7 @@ Object.defineProperty(exports, "Component", {
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -304,7 +444,7 @@ var currentReadyCheck = function currentReadyCheck() {
         return Promise.resolve();
     }
     return new Promise() < null > function (resolve) {
-        __webpack_require__(3).then(function () {
+        __webpack_require__(4).then(function () {
             window.addEventListener('WebComponentsReady', resolve);
         });
     };
@@ -321,7 +461,7 @@ var setReadyCheck = exports.setReadyCheck = function setReadyCheck(readyCheck) {
 exports.default = registerComponent;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 (function(){
@@ -367,7 +507,7 @@ var Z=window.customElements;if(!Z||Z.forcePolyfill||"function"!=typeof Z.define|
 
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -385,7 +525,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _store = __webpack_require__(0);
 
-var _tag = __webpack_require__(5);
+var _tag = __webpack_require__(1);
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -627,129 +767,6 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
 }(HTMLElement));
 
 exports.default = Component;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = html;
-exports.addTemplateHandler = addTemplateHandler;
-exports.accessHandler = accessHandler;
-exports.unloadHandler = unloadHandler;
-exports.setEventsHandler = setEventsHandler;
-exports.unloadEvents = unloadEvents;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var EventsTagHandler = function EventsTagHandler() {
-    var _this = this;
-
-    _classCallCheck(this, EventsTagHandler);
-
-    this.targetNo = 0;
-
-    this.registerEvent = function (event, fn) {
-        for (var i in window.muskotListeners) {
-            var listener = window.muskotListeners[i];
-            if (listener === fn) {
-                return "on" + event + "=\"muskotListeners[" + i + "]()\"";
-            }
-        }
-        window.muskotListeners[_this.targetNo] = fn;
-        return "on" + event + "=\"muskotListeners[" + _this.targetNo++ + "]()\"";
-    };
-
-    this.call = function (raw, args) {
-        return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, function (match, event, index) {
-            return _this.registerEvent(event.toLowerCase(), args[index]);
-        });
-    };
-
-    this.unloadEvents = function (component) {
-        var root = component;
-        if (component.shadowRoot) {
-            root = component.shadowRoot;
-        }
-        var match = void 0;
-        var regExp = /muskotListeners\[(\d+?)\]/g;
-        var str = root.innerHTML;
-        var removeIndexes = {};
-        while (match = regExp.exec(str)) {
-            removeIndexes[match[1]] = true;
-        }
-        window.muskotListeners = window.muskotListeners.filter(function (el, i) {
-            return !removeIndexes[i];
-        });
-        _this.targetNo = window.muskotListeners.length;
-    };
-
-    window.muskotListeners = [];
-};
-
-var coreHandlers = {
-    events: new EventsTagHandler()
-};
-
-var customHandlers = {};
-
-var handlers = [coreHandlers.events.call];
-
-function html(strings) {
-    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        args[_key - 1] = arguments[_key];
-    }
-
-    if (!args.length) {
-        return strings[0];
-    }
-
-    var ARG = "__ARG__";
-    var acc = "";
-    for (var i = 0; i < strings.length; i++) {
-        acc += strings[i];
-        if (i < strings.length - 1) {
-            acc += ARG + i;
-        }
-    }
-    return handlers.reduce(
-    // $FlowFixMe
-    function (str, next) {
-        return next(str, args);
-    }, acc).replace(/__ARG__(\d)/g, function (match, index) {
-        return String(args[index]);
-    });
-}
-
-function addTemplateHandler(key, handler) {
-    customHandlers[key] = handler;
-    // $FlowFixMe
-    handlers.push(handler.call);
-}
-
-function accessHandler(key) {
-    return customHandlers[key];
-}
-
-function unloadHandler(key) {
-    var handler = customHandlers[key];
-    handlers = handlers.filter(function (el) {
-        return el !== handler.call;
-    });
-}
-
-function setEventsHandler(handler) {
-    coreHandlers.events = handler;
-}
-
-function unloadEvents(component) {
-    coreHandlers.events.unloadEvents(component);
-}
 
 /***/ })
 /******/ ]);

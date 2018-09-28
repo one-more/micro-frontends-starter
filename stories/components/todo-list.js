@@ -1,27 +1,7 @@
 import {
-    Component, registerComponent, addTemplateHandler,
+    Component, registerComponent,
     registerReducer, html
 } from "../../dist/main";
-
-const MapHandler = {
-    call: (raw: string, args: any[]) => {
-        return raw.replace(
-            /<(\w+)\s+(.*)map="(__ARG__(\d+))"(.*)>([\s\S]*)<\/\1>/gm,
-            (match: string, tag: string, attributes, arg, arrIndex) => {
-                const arr = args[arrIndex];
-                const template = match.replace(/map=".*"/, '');
-                return arr.map(el => {
-                    return template.replace(/__ARG__(\d+)/g, (match: string, index: number) => {
-                        const fn = args[index];
-                        return fn(el)
-                    })
-                })
-            }
-        )
-    }
-};
-
-addTemplateHandler('map', MapHandler);
 
 const KEY = 'todo-list';
 
@@ -46,7 +26,7 @@ const reducer = {
                 items: state.items.concat(todo)
             }
         },
-        done(state, id) {
+        toggle(state, id) {
             return {
                 items: state.items.map(todo => {
                     if (todo.id === id) {
@@ -80,12 +60,14 @@ export default class TodoList extends Component {
         return html`
             <ul>
                 <li map="${this.state[KEY].items}">
-                    <input 
-                        type="checkbox" 
-                        ${(el) => el.done ? 'checked' : ''}
-                        onclick=""
-                    >
-                    ${(el) => el.text}
+                    ${el => html`
+                        <input 
+                            type="checkbox" 
+                            ${el.done ? 'checked' : ''}
+                            onClick="${this.state[KEY].toggle.bind(null, el.id)}"
+                        >
+                        ${el.text}
+                    `}
                 </li>
             </ul>
         `

@@ -51,14 +51,36 @@ class EventsTagHandler implements TemplateEventsHandler {
     }
 }
 
+const MapHandler = {
+    call: (raw: string, args: any[]) => {
+        return raw.replace(
+            /<(\w+)\s+(.*)map="(__ARG__(\d+))"(.*)>([\s\S]*)<\/\1>/gm,
+            (match: string, tag: string, attributes, arg, arrIndex) => {
+                const arr = args[arrIndex];
+                const template = match.replace(/map=".*"/, '');
+                return arr.map(el => {
+                    return template.replace(/__ARG__(\d+)/g, (match: string, index: number) => {
+                        const fn = args[index];
+                        if (typeof fn === "function")
+                            return fn(el);
+                        return fn
+                    })
+                })
+            }
+        )
+    }
+};
+
 const coreHandlers = {
-    events: new EventsTagHandler
+    events: new EventsTagHandler,
+    map: MapHandler
 };
 
 const customHandlers = {};
 
 let handlers = [
-    coreHandlers.events.call
+    coreHandlers.map.call,
+    coreHandlers.events.call,
 ];
 
 export default function html(strings: string[], ...args: any[]) {
@@ -86,7 +108,7 @@ export default function html(strings: string[], ...args: any[]) {
 export function addTemplateHandler(key:string, handler: TemplateHandler): void {
     customHandlers[key] = handler;
     // $FlowFixMe
-    handlers.push(handler.call)
+    handlers.unshift(handler.call)
 }
 
 export function accessHandler(key: string): TemplateHandler {
