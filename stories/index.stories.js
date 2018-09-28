@@ -6,6 +6,7 @@ import "./components/hello-world"
 import "./components/clock"
 import "./components/greeter"
 import "./components/counter"
+import "./components/todo-list"
 
 changeStoreImplementation(store);
 
@@ -14,3 +15,4 @@ storiesOf('Component', module)
     .add('clock', () => <x-clock></x-clock>)
     .add('without shadow dom', () => <x-greeter name="greeter!"></x-greeter>)
     .add('counter', () => <x-counter start="5"></x-counter>)
+    .add('todo list', () => <todo-list></todo-list>)

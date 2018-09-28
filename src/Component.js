@@ -1,6 +1,7 @@
 // @flow
 
 import {subscribe, getState} from "./store"
+import {unloadEvents} from "./tag"
 
 function render() {
     setTimeout(() => {
@@ -95,6 +96,7 @@ export default class Component extends HTMLElement {
         for (const subscription of this.subscriptions) {
             subscription.unsubscribe()
         }
+        unloadEvents(this);
 
         this.disconnected()
     }

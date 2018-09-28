@@ -1,15 +1,21 @@
 // @flow
 
-type TemplateHandler = (raw: string, args: any[]) => string
+interface TemplateHandler {
+    call(raw: string, args: any[]): string
+}
 
-class EventHandlers {
+interface TemplateEventsHandler extends TemplateHandler {
+    unloadEvents(component: HTMLElement): void
+}
+
+class EventsTagHandler implements TemplateEventsHandler {
     targetNo: number = 0;
 
     constructor() {
-        window.muskotListeners = {}
+        window.muskotListeners = []
     }
 
-    register(event: string, fn: Function): string {
+    registerEvent = (event: string, fn: Function) => {
         for (const i in window.muskotListeners) {
             const listener = window.muskotListeners[i];
             if (listener === fn) {
@@ -18,17 +24,41 @@ class EventHandlers {
         }
         window.muskotListeners[this.targetNo] = fn;
         return `on${event}="muskotListeners[${this.targetNo++}]()"`
+    };
+
+    call = (raw: string, args: any[]) => {
+        return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, (match: string, event: string, index: number) => {
+            return this.registerEvent(event.toLowerCase(), args[index])
+        })
+    };
+
+    unloadEvents = (component: HTMLElement) => {
+        let root = component;
+        if(component.shadowRoot) {
+            root = component.shadowRoot
+        }
+        let match;
+        const regExp = /muskotListeners\[(\d+?)\]/g;
+        const str = root.innerHTML;
+        const removeIndexes = {};
+        while (match = regExp.exec(str)) {
+            removeIndexes[match[1]] = true
+        }
+        window.muskotListeners = window.muskotListeners.filter((el: Function, i: number) => {
+            return !removeIndexes[i]
+        });
+        this.targetNo = window.muskotListeners.length
     }
 }
 
-const eventHandlers = new EventHandlers();
+const coreHandlers = {
+    events: new EventsTagHandler
+};
 
-const handlers = [
-    (raw: string, args: any[]) => {
-        return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, (match: string, event: string, index: number) => {
-            return eventHandlers.register(event.toLowerCase(), args[index])
-        })
-    }
+const customHandlers = {};
+
+let handlers = [
+    coreHandlers.events.call
 ];
 
 export default function html(strings: string[], ...args: any[]) {
@@ -37,7 +67,7 @@ export default function html(strings: string[], ...args: any[]) {
     }
 
     const ARG = "__ARG__";
-    let acc = "";
+    let acc: string = "";
     for (let i = 0; i < strings.length; i++) {
         acc += strings[i];
         if (i < strings.length - 1) {
@@ -45,6 +75,7 @@ export default function html(strings: string[], ...args: any[]) {
         }
     }
     return handlers.reduce(
+        // $FlowFixMe
         (str: string, next: Function) => next(str, args),
         acc
     ).replace(/__ARG__(\d)/g, (match: string, index: number) => {
@@ -52,6 +83,25 @@ export default function html(strings: string[], ...args: any[]) {
     })
 }
 
-export function addTemplateHandler(fn: any) {
-    handlers.push(fn)
+export function addTemplateHandler(key:string, handler: TemplateHandler): void {
+    customHandlers[key] = handler;
+    // $FlowFixMe
+    handlers.push(handler.call)
+}
+
+export function accessHandler(key: string): TemplateHandler {
+    return customHandlers[key]
+}
+
+export function unloadHandler(key: string): void {
+    const handler = customHandlers[key];
+    handlers = handlers.filter(el => el !== handler.call)
+}
+
+export function setEventsHandler(handler: TemplateEventsHandler): void {
+    coreHandlers.events = handler
+}
+
+export function unloadEvents(component: HTMLElement): void {
+    coreHandlers.events.unloadEvents(component)
 }

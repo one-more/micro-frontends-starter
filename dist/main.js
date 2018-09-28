@@ -241,6 +241,24 @@ Object.defineProperty(exports, "addTemplateHandler", {
         return _tag.addTemplateHandler;
     }
 });
+Object.defineProperty(exports, "setEventsHandler", {
+    enumerable: true,
+    get: function get() {
+        return _tag.setEventsHandler;
+    }
+});
+Object.defineProperty(exports, "unloadHandler", {
+    enumerable: true,
+    get: function get() {
+        return _tag.unloadHandler;
+    }
+});
+Object.defineProperty(exports, "accessHandler", {
+    enumerable: true,
+    get: function get() {
+        return _tag.accessHandler;
+    }
+});
 
 var _Component = __webpack_require__(4);
 
@@ -367,6 +385,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _store = __webpack_require__(0);
 
+var _tag = __webpack_require__(5);
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -383,7 +403,7 @@ var _fixBabelExtend = function (O) {
         o.__proto__ = p;
         return o;
     },
-        construct = (typeof Reflect === 'undefined' ? 'undefined' : _typeof(Reflect)) === 'object' ? Reflect.construct : function (Parent, args, Class) {
+        construct = (typeof Reflect === "undefined" ? "undefined" : _typeof(Reflect)) === 'object' ? Reflect.construct : function (Parent, args, Class) {
         var Constructor,
             a = [null];
         a.push.apply(a, args);
@@ -449,17 +469,17 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     _inherits(Component, _HTMLElement);
 
     _createClass(Component, [{
-        key: 'name',
+        key: "name",
         get: function get() {
             return Object.getPrototypeOf(this).constructor.name;
         }
     }, {
-        key: 'isShadow',
+        key: "isShadow",
         get: function get() {
             return true;
         }
     }, {
-        key: 'props',
+        key: "props",
         get: function get() {
             return _extends({}, this.__defaultProps, parseAttributes(this.attributes));
         },
@@ -467,7 +487,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
             this.__defaultProps = props;
         }
     }, {
-        key: 'keys',
+        key: "keys",
         get: function get() {
             return [];
         }
@@ -491,12 +511,12 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }
 
     _createClass(Component, [{
-        key: 'render',
+        key: "render",
         value: function render() {
             return '';
         }
     }, {
-        key: 'subscribeToStore',
+        key: "subscribeToStore",
         value: function subscribeToStore() {
             var _this3 = this;
 
@@ -534,7 +554,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
             }
         }
     }, {
-        key: 'connectedCallback',
+        key: "connectedCallback",
         value: function connectedCallback() {
             this.subscribeToStore();
             if (!this.isShadow) {
@@ -544,10 +564,10 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
             this.connected();
         }
     }, {
-        key: 'connected',
+        key: "connected",
         value: function connected() {}
     }, {
-        key: 'disconnectedCallback',
+        key: "disconnectedCallback",
         value: function disconnectedCallback() {
             var _iteratorNormalCompletion3 = true;
             var _didIteratorError3 = false;
@@ -574,13 +594,15 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
                 }
             }
 
+            (0, _tag.unloadEvents)(this);
+
             this.disconnected();
         }
     }, {
-        key: 'disconnected',
+        key: "disconnected",
         value: function disconnected() {}
     }, {
-        key: 'adoptedCallback',
+        key: "adoptedCallback",
         value: function adoptedCallback() {
             this.subscribeToStore();
             render.call(this);
@@ -588,16 +610,16 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
             this.adopted();
         }
     }, {
-        key: 'adopted',
+        key: "adopted",
         value: function adopted() {}
     }, {
-        key: 'attributeChangedCallback',
+        key: "attributeChangedCallback",
         value: function attributeChangedCallback(attributeName, oldValue, newValue) {
             this.propsChanged(_extends({}, this.props, _defineProperty({}, attributeName, newValue)));
             render.call(this);
         }
     }, {
-        key: 'propsChanged',
+        key: "propsChanged",
         value: function propsChanged(newProps) {}
     }]);
 
@@ -616,47 +638,67 @@ exports.default = Component;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 exports.default = html;
 exports.addTemplateHandler = addTemplateHandler;
+exports.accessHandler = accessHandler;
+exports.unloadHandler = unloadHandler;
+exports.setEventsHandler = setEventsHandler;
+exports.unloadEvents = unloadEvents;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var EventHandlers = function () {
-    function EventHandlers() {
-        _classCallCheck(this, EventHandlers);
+var EventsTagHandler = function EventsTagHandler() {
+    var _this = this;
 
-        this.targetNo = 0;
+    _classCallCheck(this, EventsTagHandler);
 
-        window.muskotListeners = {};
-    }
+    this.targetNo = 0;
 
-    _createClass(EventHandlers, [{
-        key: "register",
-        value: function register(event, fn) {
-            for (var i in window.muskotListeners) {
-                var listener = window.muskotListeners[i];
-                if (listener === fn) {
-                    return "on" + event + "=\"muskotListeners[" + i + "]()\"";
-                }
+    this.registerEvent = function (event, fn) {
+        for (var i in window.muskotListeners) {
+            var listener = window.muskotListeners[i];
+            if (listener === fn) {
+                return "on" + event + "=\"muskotListeners[" + i + "]()\"";
             }
-            window.muskotListeners[this.targetNo] = fn;
-            return "on" + event + "=\"muskotListeners[" + this.targetNo++ + "]()\"";
         }
-    }]);
+        window.muskotListeners[_this.targetNo] = fn;
+        return "on" + event + "=\"muskotListeners[" + _this.targetNo++ + "]()\"";
+    };
 
-    return EventHandlers;
-}();
+    this.call = function (raw, args) {
+        return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, function (match, event, index) {
+            return _this.registerEvent(event.toLowerCase(), args[index]);
+        });
+    };
 
-var eventHandlers = new EventHandlers();
+    this.unloadEvents = function (component) {
+        var root = component;
+        if (component.shadowRoot) {
+            root = component.shadowRoot;
+        }
+        var match = void 0;
+        var regExp = /muskotListeners\[(\d+?)\]/g;
+        var str = root.innerHTML;
+        var removeIndexes = {};
+        while (match = regExp.exec(str)) {
+            removeIndexes[match[1]] = true;
+        }
+        window.muskotListeners = window.muskotListeners.filter(function (el, i) {
+            return !removeIndexes[i];
+        });
+        _this.targetNo = window.muskotListeners.length;
+    };
 
-var handlers = [function (raw, args) {
-    return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, function (match, event, index) {
-        return eventHandlers.register(event.toLowerCase(), args[index]);
-    });
-}];
+    window.muskotListeners = [];
+};
+
+var coreHandlers = {
+    events: new EventsTagHandler()
+};
+
+var customHandlers = {};
+
+var handlers = [coreHandlers.events.call];
 
 function html(strings) {
     for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -675,15 +717,38 @@ function html(strings) {
             acc += ARG + i;
         }
     }
-    return handlers.reduce(function (str, next) {
+    return handlers.reduce(
+    // $FlowFixMe
+    function (str, next) {
         return next(str, args);
     }, acc).replace(/__ARG__(\d)/g, function (match, index) {
         return String(args[index]);
     });
 }
 
-function addTemplateHandler(fn) {
-    handlers.push(fn);
+function addTemplateHandler(key, handler) {
+    customHandlers[key] = handler;
+    // $FlowFixMe
+    handlers.push(handler.call);
+}
+
+function accessHandler(key) {
+    return customHandlers[key];
+}
+
+function unloadHandler(key) {
+    var handler = customHandlers[key];
+    handlers = handlers.filter(function (el) {
+        return el !== handler.call;
+    });
+}
+
+function setEventsHandler(handler) {
+    coreHandlers.events = handler;
+}
+
+function unloadEvents(component) {
+    coreHandlers.events.unloadEvents(component);
 }
 
 /***/ })

@@ -17,7 +17,10 @@ export {
 
 export {
     default as html,
-    addTemplateHandler
+    addTemplateHandler,
+    setEventsHandler,
+    unloadHandler,
+    accessHandler
 } from "./tag"
 
 export {default as Component} from "./Component"

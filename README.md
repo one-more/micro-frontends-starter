@@ -10,7 +10,26 @@ And routing - that's it!
 Let's get starting writing components
 
 ### render
-Simple template literals with some handy event handling spicing
+render method of component must return string. it can be either
+simple string
+````es6
+import {Component, registerComponent} from "muskot"
+
+export default class MyComponent extends Component {
+    render() {
+        return html`
+            <div>
+                greet the world
+            </div>
+        `
+    }
+}
+
+registerComponent('my-component', MyComponent);
+````
+
+or with string, processed with out tag function `html`
+
 ````es6
 import {Component, registerComponent, html} from "muskot"
 
@@ -23,13 +42,16 @@ export default class MyComponent extends Component {
         return html`
             <button onClick=${this.greet} >
                 greet the world
-            </div>
+            </button>
         `
     }
 }
 
 registerComponent('my-component', MyComponent);
 ````
+
+out of the box `html` function can process event handlers; it's functionality 
+can be enhanced - read about iy below;
 
 it's important to register every component by registerComponent function
 
@@ -52,7 +74,7 @@ export default class MyComponent extends Component {
         return html`
             <button onClick=${this.greet} >
                 greet the world
-            </div>
+            </button>
         `
     }
 }
@@ -246,6 +268,19 @@ interface RouterParams {
 ````
 
 ## Going deeper
+### enhance `html` functionality
+Custom handler must have following interface
+````es6
+interface TemplateHandler {
+    call(raw: string, args: any[]) => string
+}
+````
+to add custom handler
+````es6
+import {addTemplateHandler} from "muskot"
+const myHandler = {}
+```` 
+
 ### replace store implementation
 It's possible to change store implementation without rewriting code;
 to add another implementation it has to implement following interface
