@@ -20,7 +20,8 @@ export {
     addTemplateHandler,
     setEventsHandler,
     unloadHandler,
-    accessHandler
+    accessHandler,
+    bind
 } from "./tag"
 
 export {default as Component} from "./Component"

@@ -8,7 +8,8 @@ function render() {
         if (this.isShadow && !this.shadowRoot) {
             this.attachShadow({mode: 'open'});
         }
-        const render = this.render();
+        const styles = `<style>${this.styles}</style>`;
+        const render = styles + this.render();
         if (this.isShadow) {
             (this.shadowRoot: any).innerHTML = render
         }
@@ -48,6 +49,10 @@ export default class Component extends HTMLElement {
 
     get keys() {
         return []
+    }
+
+    get styles(): string {
+        return ""
     }
 
     __defaultProps = {};
