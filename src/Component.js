@@ -2,21 +2,10 @@
 
 import {subscribe, getState} from "./store"
 import {unloadEvents} from "./tag"
+import {scheduleRender} from "./render-queue"
 
 function render() {
-    setTimeout(() => {
-        if (this.isShadow && !this.shadowRoot) {
-            this.attachShadow({mode: 'open'});
-        }
-        const styles = `<style>${this.styles}</style>`;
-        const render = styles + this.render();
-        if (this.isShadow) {
-            (this.shadowRoot: any).innerHTML = render
-        }
-        else {
-            this.innerHTML = render
-        }
-    })
+    scheduleRender(this);
 }
 
 function parseAttributes(attributes: NamedNodeMap): Object {
@@ -32,7 +21,7 @@ export default class Component extends HTMLElement {
         return Object.getPrototypeOf(this).constructor.name
     }
 
-    get isShadow() {
+    get isShadow(): boolean {
         return true
     }
 
@@ -64,7 +53,6 @@ export default class Component extends HTMLElement {
     constructor() {
         super();
 
-        this.subscribeToStore();
         if (this.isShadow) {
             render.call(this);
         }

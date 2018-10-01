@@ -666,6 +666,8 @@ var _store = __webpack_require__(0);
 
 var _tag = __webpack_require__(1);
 
+var _renderQueue = __webpack_require__(8);
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -699,20 +701,7 @@ var _fixBabelExtend = function (O) {
 }(Object);
 
 function render() {
-    var _this = this;
-
-    setTimeout(function () {
-        if (_this.isShadow && !_this.shadowRoot) {
-            _this.attachShadow({ mode: 'open' });
-        }
-        var styles = "<style>" + _this.styles + "</style>";
-        var render = styles + _this.render();
-        if (_this.isShadow) {
-            _this.shadowRoot.innerHTML = render;
-        } else {
-            _this.innerHTML = render;
-        }
-    });
+    (0, _renderQueue.scheduleRender)(this);
 }
 
 function parseAttributes(attributes) {
@@ -781,18 +770,17 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     function Component() {
         _classCallCheck(this, Component);
 
-        var _this2 = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
+        var _this = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
 
-        _this2.__defaultProps = {};
-        _this2.subscriptions = [];
-        _this2.state = {};
+        _this.__defaultProps = {};
+        _this.subscriptions = [];
+        _this.state = {};
 
 
-        _this2.subscribeToStore();
-        if (_this2.isShadow) {
-            render.call(_this2);
+        if (_this.isShadow) {
+            render.call(_this);
         }
-        return _this2;
+        return _this;
     }
 
     _createClass(Component, [{
@@ -803,14 +791,14 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: "subscribeToStore",
         value: function subscribeToStore() {
-            var _this3 = this;
+            var _this2 = this;
 
             var _loop = function _loop(key) {
-                _this3.subscriptions.push((0, _store.subscribe)(key, function (state) {
-                    _this3.state[key] = state;
-                    render.call(_this3);
+                _this2.subscriptions.push((0, _store.subscribe)(key, function (state) {
+                    _this2.state[key] = state;
+                    render.call(_this2);
                 }));
-                _this3.state[key] = (0, _store.getState)(key);
+                _this2.state[key] = (0, _store.getState)(key);
             };
 
             var _iteratorNormalCompletion2 = true;
@@ -1008,6 +996,122 @@ var Store = function Store() {
 };
 
 var store = exports.store = new Store();
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.scheduleRender = scheduleRender;
+exports.executeRender = executeRender;
+
+
+var queue = [];
+
+function childNodesEqual(elementNodes, fragmentNodes) {}
+
+function attributesEqual(attr1, attr2) {
+    if (attr1 && attr2) return attr1.nodeValue === attr2.nodeValue;
+    return false;
+}
+
+function attributesDiff(nodeAttributes, fragmentAttributes) {
+    var diff = [];
+    var iterable = nodeAttributes.length > fragmentAttributes.length ? nodeAttributes : fragmentAttributes;
+    var comparable = iterable === fragmentAttributes ? nodeAttributes : fragmentAttributes;
+    for (var i = 0; i < iterable.length; i++) {
+        if (!attributesEqual(iterable[i], comparable[i])) {
+            diff.push({
+                element: nodeAttributes[i],
+                fragment: fragmentAttributes[i]
+            });
+        }
+    }
+    return diff;
+}
+
+function updateElement(elementNodes, fragmentNodes) {
+    for (var i = 0; i < elementNodes.length; i++) {
+        if (!elementNodes[i].isEqualNode(fragmentNodes[i])) {
+            var diffAttributes = attributesDiff(elementNodes[i].attributes, fragmentNodes[i].attributes);
+            if (!diffAttributes.length) {
+                console.log("attributes are equal");
+            } else {
+                console.log(diffAttributes);
+            }
+            updateElement(elementNodes[i].childNodes, fragmentNodes[i].childNodes);
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = diffAttributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var stack = _step.value;
+                    var element = stack.element,
+                        fragment = stack.fragment;
+
+                    if (element && fragment || !element && fragment) {
+                        elementNodes[i].setAttribute(fragment.nodeName, fragment.nodeValue);
+                    } else if (element && !fragment) {
+                        elementNodes[i].removeAttribute(element.nodeName);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+        }
+    }
+}
+
+function render() {
+    if (this.isShadow && !this.shadowRoot) {
+        this.attachShadow({ mode: 'open' });
+    }
+    var styles = "<style>" + this.styles + "</style>";
+    var render = styles + this.render();
+    var root = this.isShadow ? this.shadowRoot : this;
+    if (!root.innerHTML) {
+        root.innerHTML = render;
+    } else {
+        var fragment = document.createElement("template");
+        fragment.innerHTML = render;
+        updateElement(root.childNodes, fragment.content.childNodes);
+    }
+}
+
+var scheduleId = void 0;
+
+function scheduleRender(component) {
+    queue.push(component);
+    if (scheduleId) {
+        clearTimeout(scheduleId);
+    }
+    scheduleId = setTimeout(executeRender);
+}
+
+function executeRender() {
+    var component = void 0;
+    while (component = queue.pop()) {
+        render.call(component);
+    }
+    scheduleId = null;
+}
 
 /***/ })
 /******/ ]);
