@@ -167,200 +167,72 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 exports.default = html;
 exports.addTemplateHandler = addTemplateHandler;
 exports.accessHandler = accessHandler;
 exports.unloadHandler = unloadHandler;
 exports.setEventsHandler = setEventsHandler;
-exports.unloadEvents = unloadEvents;
-exports.bind = bind;
 
-var _simpleStore = __webpack_require__(7);
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var EventsTagHandler = function () {
-    function EventsTagHandler() {
-        var _this = this;
-
-        _classCallCheck(this, EventsTagHandler);
-
-        this.targetNo = 0;
-
-        this.registerEvent = function (event, fn) {
-            var _getListener = _this.getListener(fn),
-                targetNo = _getListener.targetNo,
-                listener = _getListener.listener;
-
-            if (listener) {
-                return _this.getAttribute(Number(targetNo), event);
-            }
-            window.muskotListeners[_this.targetNo] = fn;
-            return _this.getAttribute(_this.targetNo++, event);
-        };
-
-        this.call = function (raw, args) {
-            return raw.replace(/on(\w+)="__ARG__(\d+)"/ig, function (match, event, index) {
-                return _this.registerEvent(event.toLowerCase(), args[index]);
-            });
-        };
-
-        this.unloadEvents = function (component) {
-            var root = component;
-            if (component.shadowRoot) {
-                root = component.shadowRoot;
-            }
-            var match = void 0;
-            var regExp = /muskotListeners\[(\d+?)\]/g;
-            var str = root.innerHTML;
-            var removeIndexes = {};
-            while (match = regExp.exec(str)) {
-                removeIndexes[match[1]] = true;
-            }
-            window.muskotListeners = window.muskotListeners.filter(function (el, i) {
-                if (removeIndexes[i]) {
-                    var _iteratorNormalCompletion = true;
-                    var _didIteratorError = false;
-                    var _iteratorError = undefined;
-
-                    try {
-                        for (var _iterator = _this.bounds[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                            var _ref = _step.value;
-
-                            var _ref2 = _slicedToArray(_ref, 2);
-
-                            var arg = _ref2[0];
-                            var _store = _ref2[1];
-                            var _iteratorNormalCompletion2 = true;
-                            var _didIteratorError2 = false;
-                            var _iteratorError2 = undefined;
-
-                            try {
-                                for (var _iterator2 = _store[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                                    var _ref3 = _step2.value;
-
-                                    var _ref4 = _slicedToArray(_ref3, 2);
-
-                                    var fn = _ref4[0];
-                                    var bounded = _ref4[1];
-
-                                    if (bounded === el) {
-                                        _store.delete(fn);
-                                    }
-                                    if (_store.size === 0) {
-                                        _this.bounds.delete(arg);
-                                    }
-                                }
-                            } catch (err) {
-                                _didIteratorError2 = true;
-                                _iteratorError2 = err;
-                            } finally {
-                                try {
-                                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                                        _iterator2.return();
-                                    }
-                                } finally {
-                                    if (_didIteratorError2) {
-                                        throw _iteratorError2;
-                                    }
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        _didIteratorError = true;
-                        _iteratorError = err;
-                    } finally {
-                        try {
-                            if (!_iteratorNormalCompletion && _iterator.return) {
-                                _iterator.return();
-                            }
-                        } finally {
-                            if (_didIteratorError) {
-                                throw _iteratorError;
-                            }
-                        }
+var EventsTagHandler = {
+    call: function call(node, args) {
+        var attributes = node.attributes || [];
+        console.log(node);
+        for (var i = 0; i < attributes.length; i++) {
+            var attribute = attributes[i];
+            if (attribute.nodeName.startsWith("on")) {
+                var match = attribute.nodeValue.match(/__ARG__(\d+)/);
+                if (match && match[1]) {
+                    var index = Number(match[1]);
+                    var listener = args[index];
+                    if (typeof listener === "function") {
+                        node.removeAttribute(attribute.nodeName);
+                        node.addEventListener(attribute.nodeName.toLowerCase().slice(2), listener);
                     }
                 }
-                return !removeIndexes[i];
-            });
-            _this.targetNo = window.muskotListeners.length;
-        };
-
-        this.bind = function (strings, fn) {
-            for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-                args[_key - 2] = arguments[_key];
             }
-
-            if (typeof fn !== "function") {
-                console.error("error in bind - first argument is not a function!", fn);
-            }
-            var firstArg = args[0];
-            // $FlowFixMe
-            var store = _this.bounds.get(firstArg);
-            var bounded = fn.bind.apply(fn, [null].concat(_toConsumableArray(args)));
-            if (store) {
-                var _bound = store.get(fn);
-                if (_bound) {
-                    return _bound;
-                }
-                store.set(fn, bounded);
-                return bounded;
-            }
-            var bound = new Map();
-            bound.set(fn, bounded);
-            _this.bounds.set(firstArg, bound);
-            return bounded;
-        };
-
-        window.muskotListeners = [];
-        this.bounds = new Map();
+        }
     }
-
-    _createClass(EventsTagHandler, [{
-        key: "getAttribute",
-        value: function getAttribute(targetNo, event) {
-            return "on" + event + "=\"muskotListeners[" + targetNo + "](event)\"";
-        }
-    }, {
-        key: "getListener",
-        value: function getListener(fn) {
-            for (var i in window.muskotListeners) {
-                var listener = window.muskotListeners[i];
-                if (listener === fn) {
-                    return { targetNo: i, listener: listener };
-                }
-            }
-            return { targetNo: null, listener: null };
-        }
-    }]);
-
-    return EventsTagHandler;
-}();
+};
 
 var MapHandler = {
-    call: function call(raw, args) {
-        return raw.replace(/<(\w+)\s+(.*)map="(__ARG__(\d+))"(.*)>([\s\S]*)<\/\1>/gm, function (match, tag, attributes, arg, arrIndex) {
-            var arr = args[arrIndex];
-            var template = match.replace(/map=".*"/, '');
-            return arr.map(function (el) {
-                return template.replace(/__ARG__(\d+)/g, function (match, index) {
-                    var fn = args[index];
-                    if (typeof fn === "function") return fn(el);
-                    return fn;
-                });
-            }).join("");
-        });
+    call: function call(node, args) {
+        if (node instanceof HTMLTemplateElement) {
+            if (node.hasAttribute("map")) {
+                var match = String(node.getAttribute("map")).match(/__ARG__(\d+)/);
+                if (match && match[1]) {
+                    var index = Number(match[1]);
+                    var arr = args[index];
+                    var tpl = node.innerHTML;
+                    var fragment = document.createDocumentFragment();
+                    arr.forEach(function (el) {
+                        return tpl.replace(/__ARG__(\d+)/g, function (match, index) {
+                            var arg = args[index];
+                            if (typeof arg === "function") {
+                                var tplCall = arg(el);
+                                if (tplCall instanceof HTMLTemplateElement) {
+                                    fragment.appendChild(tplCall.content);
+                                } else {
+                                    var tmpTpl = document.createElement("template");
+                                    tmpTpl.innerHTML = tplCall;
+                                    fragment.appendChild(tmpTpl.content);
+                                }
+                            }
+                            return arg;
+                        });
+                    });
+                    // $FlowFixMe
+                    node.parentNode.replaceChild(fragment, node);
+                }
+            }
+        }
     }
 };
 
 var coreHandlers = {
-    events: new EventsTagHandler(),
+    events: EventsTagHandler,
     map: MapHandler
 };
 
@@ -369,8 +241,8 @@ var customHandlers = {};
 var handlers = [coreHandlers.map.call, coreHandlers.events.call];
 
 function html(strings) {
-    for (var _len2 = arguments.length, args = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-        args[_key2 - 1] = arguments[_key2];
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
     }
 
     if (!args.length) {
@@ -378,19 +250,25 @@ function html(strings) {
     }
 
     var ARG = "__ARG__";
-    var acc = "";
+    var tpl = "";
     for (var i = 0; i < strings.length; i++) {
-        acc += strings[i];
+        tpl += strings[i];
         if (i < strings.length - 1) {
-            acc += ARG + i;
+            if (typeof args[i] === "function" || _typeof(args[i]) === "object") tpl += ARG + i;else tpl += args[i];
         }
     }
-    return handlers.reduce(
-    // $FlowFixMe
-    function (str, next) {
-        return next(str, args);
-    }, acc).replace(/__ARG__(\d)/g, function (match, index) {
-        return String(args[index]);
+    var template = document.createElement("template");
+    template.innerHTML = tpl;
+    callHandlers(template.content, args);
+    return template;
+}
+
+function callHandlers(element, args) {
+    handlers.forEach(function (handler) {
+        handler(element, args);
+        for (var i = 0; i < element.childNodes.length; i++) {
+            callHandlers(element.childNodes[i], args);
+        }
     });
 }
 
@@ -413,20 +291,6 @@ function unloadHandler(key) {
 
 function setEventsHandler(handler) {
     coreHandlers.events = handler;
-}
-
-function unloadEvents(component) {
-    coreHandlers.events.unloadEvents(component);
-}
-
-function bind(strings) {
-    var _coreHandlers$events;
-
-    for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-        args[_key3 - 1] = arguments[_key3];
-    }
-
-    return (_coreHandlers$events = coreHandlers.events).bind.apply(_coreHandlers$events, [strings].concat(_toConsumableArray(args)));
 }
 
 /***/ }),
@@ -664,8 +528,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _store = __webpack_require__(0);
 
-var _tag = __webpack_require__(1);
-
 var _renderQueue = __webpack_require__(8);
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -775,6 +637,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
         _this.__defaultProps = {};
         _this.subscriptions = [];
         _this.state = {};
+        _this.mounted = false;
 
 
         if (_this.isShadow) {
@@ -867,8 +730,6 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
                 }
             }
 
-            (0, _tag.unloadEvents)(this);
-
             this.disconnected();
         }
     }, {
@@ -903,101 +764,7 @@ exports.default = Component;
 
 /***/ }),
 /* 6 */,
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Store = function Store() {
-    var _this = this;
-
-    _classCallCheck(this, Store);
-
-    this.reducers = {};
-    this.actions = {};
-    this.listeners = {};
-
-    this.addReducer = function (key, reducer) {
-        _this.reducers[key] = reducer.state;
-        var actions = reducer.actions;
-
-        var _loop = function _loop(i) {
-            var action = actions[i];
-            actions[i] = function () {
-                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                    args[_key] = arguments[_key];
-                }
-
-                _this.reducers[key] = action.apply(undefined, [_this.reducers[key]].concat(args));
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = _this.listeners[key][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var cb = _step.value;
-
-                        cb(_extends({}, _this.reducers[key], actions));
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator.return) {
-                            _iterator.return();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
-            };
-        };
-
-        for (var i in actions) {
-            _loop(i);
-        }
-        _this.actions[key] = actions;
-    };
-
-    this.removeReducer = function (key) {
-        delete _this.reducers[key];
-        delete _this.actions[key];
-    };
-
-    this.subscribe = function (key, cb) {
-        if (!_this.listeners[key]) {
-            _this.listeners[key] = [];
-        }
-        _this.listeners[key].push(cb);
-        return {
-            unsubscribe: function unsubscribe() {
-                _this.listeners[key] = _this.listeners[key].filter(function (el) {
-                    return el !== cb;
-                });
-            }
-        };
-    };
-
-    this.getState = function (key) {
-        return _extends({}, _this.reducers[key], _this.actions[key]);
-    };
-};
-
-var store = exports.store = new Store();
-
-/***/ }),
+/* 7 */,
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1013,14 +780,23 @@ exports.executeRender = executeRender;
 
 var queue = [];
 
-function childNodesEqual(elementNodes, fragmentNodes) {}
-
 function attributesEqual(attr1, attr2) {
     if (attr1 && attr2) return attr1.nodeValue === attr2.nodeValue;
     return false;
 }
 
 function attributesDiff(nodeAttributes, fragmentAttributes) {
+    if (!nodeAttributes) {
+        return Array.from(fragmentAttributes || []).map(function (fragment) {
+            return {
+                element: null,
+                fragment: fragment
+            };
+        });
+    }
+    if (!fragmentAttributes) {
+        return [];
+    }
     var diff = [];
     var iterable = nodeAttributes.length > fragmentAttributes.length ? nodeAttributes : fragmentAttributes;
     var comparable = iterable === fragmentAttributes ? nodeAttributes : fragmentAttributes;
@@ -1035,48 +811,106 @@ function attributesDiff(nodeAttributes, fragmentAttributes) {
     return diff;
 }
 
-function updateElement(elementNodes, fragmentNodes) {
-    for (var i = 0; i < elementNodes.length; i++) {
-        if (!elementNodes[i].isEqualNode(fragmentNodes[i])) {
-            var diffAttributes = attributesDiff(elementNodes[i].attributes, fragmentNodes[i].attributes);
-            if (!diffAttributes.length) {
-                console.log("attributes are equal");
-            } else {
-                console.log(diffAttributes);
+function updateNode(elementNode, fragmentNode) {
+    var diffAttributes = attributesDiff(elementNode.attributes, fragmentNode.attributes);
+    var elHasC = nodeHasChildren(elementNode);
+    var frHasC = nodeHasChildren(fragmentNode);
+    if (elHasC && frHasC) {
+        updateElement(elementNode.childNodes, fragmentNode.childNodes);
+    } else {
+        // $FlowFixMe
+        elementNode.parentNode.replaceChild(fragmentNode, elementNode);
+    }
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = diffAttributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var stack = _step.value;
+            var element = stack.element,
+                fragment = stack.fragment;
+
+            if (element && fragment || !element && fragment) {
+                elementNode.setAttribute(fragment.nodeName, fragment.nodeValue);
+            } else if (element && !fragment) {
+                elementNode.removeAttribute(element.nodeName);
             }
-            updateElement(elementNodes[i].childNodes, fragmentNodes[i].childNodes);
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = diffAttributes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var stack = _step.value;
-                    var element = stack.element,
-                        fragment = stack.fragment;
-
-                    if (element && fragment || !element && fragment) {
-                        elementNodes[i].setAttribute(fragment.nodeName, fragment.nodeValue);
-                    } else if (element && !fragment) {
-                        elementNodes[i].removeAttribute(element.nodeName);
-                    }
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
             }
         }
     }
+}
+
+function nodeHasChildren(node) {
+    if (node.childNodes.length) return filterEmptyNodes(node.childNodes).length > 0;
+    return false;
+}
+
+function isAllWs(nod) {
+    // Use ECMA-262 Edition 3 String and RegExp features
+    return !/[^\t\n\r ]/.test(nod.textContent);
+}
+
+function isIgnorable(nod) {
+    return nod.nodeType === 8 || // A comment node
+    nod.nodeType === 3 && isAllWs(nod); // a text node, all ws
+}
+
+function filterEmptyNodes(nodeList) {
+    var res = [];
+    for (var i = 0; i < nodeList.length; i++) {
+        if (!isIgnorable(nodeList[i])) {
+            res.push(nodeList[i]);
+        }
+    }
+    return res;
+}
+
+function updateElement(elementNodes, fragmentNodes) {
+    // $FlowFixMe
+    elementNodes = filterEmptyNodes(elementNodes);
+    // $FlowFixMe
+    fragmentNodes = filterEmptyNodes(fragmentNodes);
+    if (elementNodes.length > fragmentNodes.length) {
+        for (var i = fragmentNodes.length; i < elementNodes.length; i++) {
+            elementNodes[i].parentNode.removeChild(elementNodes[i]);
+            elementNodes.splice(i, 1);
+        }
+    }
+    for (var _i = 0; _i < elementNodes.length; _i++) {
+        if (!elementNodes[_i].isEqualNode(fragmentNodes[_i])) {
+            if (elementNodes[_i].tagName === fragmentNodes[_i].tagName) {
+                updateNode(elementNodes[_i], fragmentNodes[_i]);
+            } else {
+                elementNodes[_i].parentNode.replaceChild(fragmentNodes[_i], elementNodes[_i]);
+            }
+        }
+    }
+    if (fragmentNodes.length > elementNodes.length) {
+        var fragment = document.createDocumentFragment();
+        for (var _i2 = elementNodes.length; _i2 < fragmentNodes.length; _i2++) {
+            fragment.appendChild(fragmentNodes[_i2]);
+        }
+        elementNodes[0].parentNode.appendChild(fragment);
+    }
+}
+
+function createFragmentFromStr(tpl) {
+    var template = document.createElement("template");
+    template.innerHTML = tpl;
+    return template;
 }
 
 function render() {
@@ -1084,14 +918,15 @@ function render() {
         this.attachShadow({ mode: 'open' });
     }
     var styles = "<style>" + this.styles + "</style>";
-    var render = styles + this.render();
+    var renderRes = this.render();
     var root = this.isShadow ? this.shadowRoot : this;
-    if (!root.innerHTML) {
-        root.innerHTML = render;
+    var fragment = typeof renderRes === "string" ? createFragmentFromStr(renderRes) : renderRes;
+    if (!this.mounted) {
+        this.mounted = true;
+        root.innerHTML = styles;
+        root.appendChild(fragment.content);
     } else {
-        var fragment = document.createElement("template");
-        fragment.innerHTML = render;
-        updateElement(root.childNodes, fragment.content.childNodes);
+        updateElement(root.childNodes, fragment.childNodes);
     }
 }
 

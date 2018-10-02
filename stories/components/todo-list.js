@@ -1,26 +1,51 @@
 import {
     Component, registerComponent,
-    registerReducer, html, bind
+    registerReducer, html
 } from "../../dist/main";
+import "./todo-item"
 
 const KEY = 'todo-list';
 
+function fromStorage(defaultState) {
+    try {
+        return JSON.parse(
+            localStorage.getItem(KEY)
+        ) || defaultState
+    } catch(e) {
+        return defaultState
+    }
+}
+
+function persist(state) {
+    try {
+        localStorage.setItem(
+            KEY,
+            JSON.stringify(state)
+        );
+        return state
+    } catch (e) {
+        return state
+    }
+}
+
 const reducer = {
-    state: {
-        items: [
-            {
-                id: 0,
-                done: false,
-                text: "first!"
-            },
-            {
-                id: 1,
-                done: false,
-                text: "second!"
-            }
-        ],
-        allToggled: false
-    },
+    state: fromStorage(
+        {
+            items: [
+                {
+                    id: 0,
+                    done: false,
+                    text: "first!"
+                },
+                {
+                    id: 1,
+                    done: false,
+                    text: "second!"
+                }
+            ],
+            allToggled: false
+        }
+    ),
     actions: {
         add(state, text: string) {
             const todo = {
@@ -28,37 +53,45 @@ const reducer = {
                 done: false,
                 text
             };
-            return {
-                items: state.items.concat(todo)
-            }
+            return persist(
+                {
+                    items: state.items.concat(todo)
+                }
+            )
         },
         toggle(state, id) {
-            return {
-                items: state.items.map(todo => {
-                    if (todo.id === id) {
-                        return {
-                            ...todo,
-                            done: !todo.done
+            return persist(
+                {
+                    items: state.items.map(todo => {
+                        if (todo.id === id) {
+                            return {
+                                ...todo,
+                                done: !todo.done
+                            }
                         }
-                    }
-                    return todo
-                })
-            }
+                        return todo
+                    })
+                }
+            )
         },
         remove(state, id) {
-            return {
-                items: state.items.filter(todo => todo.id !== id)
-            }
+            return persist(
+                {
+                    items: state.items.filter(todo => todo.id !== id)
+                }
+            )
         },
         toggleAll(state) {
             const {allToggled} = state;
-            return {
-                items: state.items.map(el => ({
-                    ...el,
-                    done: !allToggled
-                })),
-                allToggled: !allToggled
-            }
+            return persist(
+                {
+                    items: state.items.map(el => ({
+                        ...el,
+                        done: !allToggled
+                    })),
+                    allToggled: !allToggled
+                }
+            )
         }
     }
 };
@@ -104,28 +137,19 @@ export default class TodoList extends Component {
                     >
                     <label for="toggle-all"></label>
                     <ul class="todo-list">
-                        <li class="${el => el.done ? 'completed' : ''}" map="${this.state[KEY].items}">
-                            ${el => html`
-                                <div class="view">
-                                    <input 
-                                        type="checkbox" 
-                                        class="toggle"
-                                        onChange="${bind`${this.state[KEY].toggle}, ${el.id}`}"
-                                        ${el.done ? 'checked' : ''}
-                                    >
-                                    <label>${el.text}</label>
-                                    <button 
-                                        class="destroy"
-                                        onClick="${bind`${this.state[KEY].remove}, ${el.id}`}"
-                                    ></button>
-                                </div>
+                        <template map="${this.state[KEY].items}" >
+                            ${item => html`
+                                <todo-item
+                                    done="${item.done}"
+                                    toggle="${this.state[KEY].toggle.bind(null, item.id)}"
+                                    destroy="${this.state[KEY].remove.bind(null, item.id)}"
+                                >
+                                    ${item.text}
+                                </todo-item>    
                             `}
-                        </li>
+                        </template>
                     </ul>
                 </section>
-                <footer class="footer">
-                    
-                </footer>
             </section>
         `
     }

@@ -1,7 +1,6 @@
 // @flow
 
 import {subscribe, getState} from "./store"
-import {unloadEvents} from "./tag"
 import {scheduleRender} from "./render-queue"
 
 function render() {
@@ -50,6 +49,8 @@ export default class Component extends HTMLElement {
 
     state = {};
 
+    mounted: boolean = false;
+
     constructor() {
         super();
 
@@ -89,7 +90,6 @@ export default class Component extends HTMLElement {
         for (const subscription of this.subscriptions) {
             subscription.unsubscribe()
         }
-        unloadEvents(this);
 
         this.disconnected()
     }
