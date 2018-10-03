@@ -1,4 +1,4 @@
-import {Component, registerComponent} from "../../dist/main";
+import {Component, registerComponent, html} from "../../dist/main";
 
 export default class TodoItem extends Component {
     static get name() {
@@ -14,7 +14,7 @@ export default class TodoItem extends Component {
     }
 
     render() {
-        return `
+        return html`
             <li class="${this.done  ? 'completed' : ''}">
                 <div class="view">
                     <input 

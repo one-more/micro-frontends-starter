@@ -42,8 +42,7 @@ const reducer = {
                     done: false,
                     text: "second!"
                 }
-            ],
-            allToggled: false
+            ]
         }
     ),
     actions: {
@@ -82,14 +81,13 @@ const reducer = {
             )
         },
         toggleAll(state) {
-            const {allToggled} = state;
+            const allToggled = state.items.every(item => item.done);
             return persist(
                 {
                     items: state.items.map(el => ({
                         ...el,
                         done: !allToggled
                     })),
-                    allToggled: !allToggled
                 }
             )
         }
@@ -143,6 +141,7 @@ export default class TodoList extends Component {
                                     done="${item.done}"
                                     toggle="${this.state[KEY].toggle.bind(null, item.id)}"
                                     destroy="${this.state[KEY].remove.bind(null, item.id)}"
+                                    id="${item.id}"
                                 >
                                     ${item.text}
                                 </todo-item>    

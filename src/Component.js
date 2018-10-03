@@ -1,11 +1,8 @@
 // @flow
 
 import {subscribe, getState} from "./store"
-import {scheduleRender} from "./render-queue"
-
-function render() {
-    scheduleRender(this);
-}
+import {render} from "./render-queue"
+import {propsMap} from "./tag"
 
 function parseAttributes(attributes: NamedNodeMap): Object {
     const result = {};
@@ -28,6 +25,7 @@ export default class Component extends HTMLElement {
         return {
             ...this.__defaultProps,
             ...parseAttributes(this.attributes),
+            ...(propsMap.get(this) || {})
         }
     }
 
@@ -49,14 +47,11 @@ export default class Component extends HTMLElement {
 
     state = {};
 
-    mounted: boolean = false;
-
     constructor() {
         super();
 
-        if (this.isShadow) {
-            render.call(this);
-        }
+        this.subscribeToStore();
+        render.call(this)
     }
 
     render() {
@@ -76,11 +71,6 @@ export default class Component extends HTMLElement {
     }
 
     connectedCallback() {
-        this.subscribeToStore();
-        if (!this.isShadow) {
-            render.call(this)
-        }
-
         this.connected()
     }
 

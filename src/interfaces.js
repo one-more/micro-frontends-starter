@@ -1,6 +1,6 @@
 // @flow
 
-export interface Component extends HTMLElement {
+export interface Component {
     get isShadow(): boolean,
     get styles(): string,
     mounted: boolean,

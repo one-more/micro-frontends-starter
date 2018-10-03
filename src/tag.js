@@ -4,10 +4,19 @@ interface TemplateHandler {
     call(node: Node, args: any[]): void
 }
 
+export const propsMap: Map<any, any> = new Map;
+
+function clearPropsMap() {
+    for (const key of propsMap.keys()) {
+        if (!document.contains(key)) {
+            propsMap.delete(key)
+        }
+    }
+}
+
 const EventsTagHandler: TemplateHandler = {
     call: (node: any, args: any[]) => {
         const attributes = node.attributes || [];
-        console.log(node);
         for (let i = 0; i < attributes.length; i++) {
             const attribute = attributes[i];
             if (attribute.nodeName.startsWith("on")) {
@@ -67,9 +76,34 @@ const MapHandler: TemplateHandler = {
     }
 };
 
+const PropsHandler: TemplateHandler = {
+    call: (node: any, args: any[]) => {
+        const attributes = node.attributes || [];
+        for (let i = 0; i < attributes.length; i++) {
+            const attribute = attributes[i];
+            const match = attribute.nodeValue.match(/__ARG__(\d+)/);
+            if (match && match[1]) {
+                const index = Number(match[1]);
+                const props = propsMap.get(node) || {};
+                node.removeAttribute(
+                    attribute.nodeName
+                );
+                propsMap.set(
+                    node,
+                    {
+                        ...props,
+                        [attribute.nodeName]: args[index]
+                    }
+                );
+            }
+        }
+    }
+};
+
 const coreHandlers = {
     events: EventsTagHandler,
-    map: MapHandler
+    map: MapHandler,
+    props: PropsHandler
 };
 
 const customHandlers = {};
@@ -77,6 +111,7 @@ const customHandlers = {};
 let handlers: Array<Function> = [
     coreHandlers.map.call,
     coreHandlers.events.call,
+    coreHandlers.props.call,
 ];
 
 export default function html(strings: string[], ...args: any[]) {
