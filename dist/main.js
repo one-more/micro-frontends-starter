@@ -821,26 +821,29 @@ function nodeConnected(node) {
 }
 
 function updateElement(elementNode, fragmentNode) {
-    var filter = {
-        acceptNode: function acceptNode(node) {
-            if (node instanceof HTMLStyleElement) {
-                return NodeFilter.FILTER_REJECT;
-            }
-            return NodeFilter.FILTER_ACCEPT;
-        }
-    };
-    var elWalker = document.createTreeWalker(elementNode, NodeFilter.SHOW_ELEMENT, filter);
-    var fragmentWalker = document.createTreeWalker(fragmentNode, NodeFilter.SHOW_ELEMENT, filter);
-    while (elWalker.nextNode()) {
-        fragmentWalker.nextNode();
+    var elClone = elementNode.cloneNode(false);
+    var frClone = fragmentNode.cloneNode(false);
+    if (!elClone.isEqualNode(frClone)) {
+        return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
+    }
+    updateChildren(elementNode, fragmentNode);
+}
 
-        var elCurrent = elWalker.currentNode;
-        var frCurrent = fragmentWalker.currentNode;
-        var elClone = elCurrent.cloneNode(false);
-        var frClone = frCurrent.cloneNode(false);
-        if (!elClone.isEqualNode(frClone)) {
-            console.log("not equal");
-        }
+function nodeFilter(node) {
+    if (node) {
+        return (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) && node.nodeName !== "STYLE";
+    }
+    return false;
+}
+
+function updateChildren(elementNode, fragmentNode) {
+    if (elementNode.childNodes.length !== fragmentNode.childNodes.length) {
+        return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
+    }
+    var elementNodes = Array.from(elementNode.childNodes).filter(nodeFilter);
+    var fragmentNodes = Array.from(fragmentNode.childNodes).filter(nodeFilter);
+    for (var i = 0; i < elementNodes.length; i++) {
+        updateElement(elementNodes[i], fragmentNodes[i]);
     }
 }
 
@@ -860,16 +863,11 @@ function render() {
     if (!nodeConnected(this)) {
         root.innerHTML = "<style>" + this.styles + "</style>";
         root.appendChild(fragment.content);
-        console.log(root);
     } else {
         var style = document.createElement("style");
         style.innerHTML = this.styles;
-        console.log(fragment.content);
         fragment.content.insertBefore(style, fragment.content.firstChild);
-        // updateElement(
-        //     root,
-        //     fragment.content
-        // )
+        updateChildren(root, fragment.content);
     }
 }
 

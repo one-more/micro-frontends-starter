@@ -5,36 +5,43 @@ function nodeConnected(node: Node): boolean {
 }
 
 function updateElement(elementNode: Node, fragmentNode: Node): void {
-    const filter = {
-        acceptNode: (node: Node) => {
-            if (node instanceof HTMLStyleElement) {
-                return NodeFilter.FILTER_REJECT
-            }
-            return NodeFilter.FILTER_ACCEPT;
-        }
-    };
-    const elWalker = document.createTreeWalker(
+    const elClone = elementNode.cloneNode(false);
+    const frClone = fragmentNode.cloneNode(false);
+    if (!elClone.isEqualNode(frClone)) {
+        return (elementNode.parentNode: any).replaceChild(
+            fragmentNode,
+            elementNode,
+        );
+    }
+    updateChildren(
         elementNode,
-        NodeFilter.SHOW_ELEMENT,
-        filter
-    );
-    const fragmentWalker = document.createTreeWalker(
-        fragmentNode,
-        NodeFilter.SHOW_ELEMENT,
-        filter
-    );
-    while (elWalker.nextNode()) {
-        fragmentWalker.nextNode();
+        fragmentNode
+    )
+}
 
-        const elCurrent = elWalker.currentNode;
-        const frCurrent = fragmentWalker.currentNode;
-        const elClone = elCurrent.cloneNode(false);
-        const frClone = frCurrent.cloneNode(false);
-        if (!elClone.isEqualNode(frClone)) {
-            console.log(
-                "not equal",
-            );
-        }
+function nodeFilter(node: Node): boolean {
+    if (node) {
+        return (node.nodeType === Node.ELEMENT_NODE ||
+            node.nodeType === Node.TEXT_NODE) &&
+            node.nodeName !== "STYLE"
+    }
+    return false
+}
+
+function updateChildren(elementNode: Node, fragmentNode: Node): void {
+    if (elementNode.childNodes.length !== fragmentNode.childNodes.length) {
+        return (elementNode.parentNode: any).replaceChild(
+            fragmentNode,
+            elementNode,
+        );
+    }
+    const elementNodes = Array.from(elementNode.childNodes).filter(nodeFilter);
+    const fragmentNodes = Array.from(fragmentNode.childNodes).filter(nodeFilter);
+    for (let i = 0; i < elementNodes.length; i++) {
+        updateElement(
+            elementNodes[i],
+            fragmentNodes[i]
+        )
     }
 }
 
@@ -54,18 +61,16 @@ export function render() {
     if (!nodeConnected(this)) {
         root.innerHTML = `<style>${this.styles}</style>`;
         root.appendChild(fragment.content);
-        console.log(root)
     } else {
         const style = document.createElement("style");
         style.innerHTML = this.styles;
-        console.log(fragment.content);
         fragment.content.insertBefore(
             style,
             fragment.content.firstChild
         );
-        // updateElement(
-        //     root,
-        //     fragment.content
-        // )
+        updateChildren(
+            root,
+            fragment.content
+        )
     }
 }
