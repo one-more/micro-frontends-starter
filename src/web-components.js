@@ -2,11 +2,15 @@
 
 interface Implemetation {
     registerComponent(name: string, component: Function): void,
+    isCustomComponent(node: Node): boolean
 }
 
 const defaultImplementation: Implemetation = {
     registerComponent(name: string, component: Function) {
         customElements.define(name, component);
+    },
+    isCustomComponent(node: Node) {
+        return node.nodeName.includes("-")
     }
 };
 
@@ -40,3 +44,7 @@ export const setReadyCheck = (readyCheck: Function) => {
 };
 
 export default registerComponent;
+
+export const isCustomComponent = (node: Node) => {
+    return currentImplementation.isCustomComponent(node)
+};

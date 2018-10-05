@@ -13,6 +13,10 @@ export default class TodoItem extends Component {
         return this.props.done === "true"
     }
 
+    static get observedAttributes() {
+        return ['id', 'done', 'toggle', 'destroy'];
+    }
+
     render() {
         return html`
             <li class="${this.done  ? 'completed' : ''}">

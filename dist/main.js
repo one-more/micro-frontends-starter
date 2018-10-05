@@ -479,6 +479,9 @@ Object.defineProperty(exports, "__esModule", {
 var defaultImplementation = {
     registerComponent: function registerComponent(name, component) {
         customElements.define(name, component);
+    },
+    isCustomComponent: function isCustomComponent(node) {
+        return node.nodeName.includes("-");
     }
 };
 
@@ -512,6 +515,9 @@ var setReadyCheck = exports.setReadyCheck = function setReadyCheck(readyCheck) {
 };
 
 exports.default = registerComponent;
+var isCustomComponent = exports.isCustomComponent = function isCustomComponent(node) {
+    return currentImplementation.isCustomComponent(node);
+};
 
 /***/ }),
 /* 4 */
@@ -578,7 +584,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _store = __webpack_require__(0);
 
-var _renderQueue = __webpack_require__(8);
+var _render = __webpack_require__(9);
 
 var _tag = __webpack_require__(1);
 
@@ -647,49 +653,18 @@ function parseAttributes(attributes) {
 var Component = _fixBabelExtend(function (_HTMLElement) {
     _inherits(Component, _HTMLElement);
 
-    _createClass(Component, [{
-        key: "name",
-        get: function get() {
-            return Object.getPrototypeOf(this).constructor.name;
-        }
-    }, {
-        key: "isShadow",
-        get: function get() {
-            return true;
-        }
-    }, {
-        key: "props",
-        get: function get() {
-            return _extends({}, this.__defaultProps, parseAttributes(this.attributes), _tag.propsMap.get(this) || {});
-        },
-        set: function set(props) {
-            this.__defaultProps = props;
-        }
-    }, {
-        key: "keys",
-        get: function get() {
-            return [];
-        }
-    }, {
-        key: "styles",
-        get: function get() {
-            return "";
-        }
-    }]);
-
     function Component() {
+        var _ref;
+
+        var _temp, _this, _ret;
+
         _classCallCheck(this, Component);
 
-        var _this = _possibleConstructorReturn(this, (Component.__proto__ || Object.getPrototypeOf(Component)).call(this));
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
 
-        _this.__defaultProps = {};
-        _this.subscriptions = [];
-        _this.state = {};
-
-
-        _this.subscribeToStore();
-        _renderQueue.render.call(_this);
-        return _this;
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Component.__proto__ || Object.getPrototypeOf(Component)).call.apply(_ref, [this].concat(args))), _this), _this.__defaultProps = {}, _this.subscriptions = [], _this.state = {}, _this.mounted = false, _temp), _possibleConstructorReturn(_this, _ret);
     }
 
     _createClass(Component, [{
@@ -705,7 +680,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
             var _loop = function _loop(key) {
                 _this2.subscriptions.push((0, _store.subscribe)(key, function (state) {
                     _this2.state[key] = state;
-                    _renderQueue.render.call(_this2);
+                    _render.render.call(_this2);
                 }));
                 _this2.state[key] = (0, _store.getState)(key);
             };
@@ -738,6 +713,9 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: "connectedCallback",
         value: function connectedCallback() {
+            this.subscribeToStore();
+            _render.render.call(this);
+
             this.connected();
         }
     }, {
@@ -780,7 +758,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
         key: "adoptedCallback",
         value: function adoptedCallback() {
             this.subscribeToStore();
-            _renderQueue.render.call(this);
+            _render.render.call(this);
 
             this.adopted();
         }
@@ -790,12 +768,41 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: "attributeChangedCallback",
         value: function attributeChangedCallback(attributeName, oldValue, newValue) {
+            console.log("!!!!!!!!!!!!!!!!!!! attributes changed");
             this.propsChanged(_extends({}, this.props, _defineProperty({}, attributeName, newValue)));
-            _renderQueue.render.call(this);
+            _render.render.call(this);
         }
     }, {
         key: "propsChanged",
         value: function propsChanged(newProps) {}
+    }, {
+        key: "name",
+        get: function get() {
+            return Object.getPrototypeOf(this).constructor.name;
+        }
+    }, {
+        key: "isShadow",
+        get: function get() {
+            return true;
+        }
+    }, {
+        key: "props",
+        get: function get() {
+            return _extends({}, this.__defaultProps, parseAttributes(this.attributes), _tag.propsMap.get(this) || {});
+        },
+        set: function set(props) {
+            this.__defaultProps = props;
+        }
+    }, {
+        key: "keys",
+        get: function get() {
+            return [];
+        }
+    }, {
+        key: "styles",
+        get: function get() {
+            return "";
+        }
     }]);
 
     return Component;
@@ -806,7 +813,8 @@ exports.default = Component;
 /***/ }),
 /* 6 */,
 /* 7 */,
-/* 8 */
+/* 8 */,
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -816,14 +824,33 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.render = render;
-function nodeConnected(node) {
-    return document.contains(node);
+
+var _webComponents = __webpack_require__(3);
+
+function updateAttributes(elementNode, fragmentNode) {
+    var attributes = fragmentNode.attributes;
+    var elementAttributes = elementNode.attributes;
+    if (elementAttributes.length > attributes.length) {
+        for (var i = 0; i < elementAttributes.length; i++) {
+            var attribute = elementAttributes[i];
+            if (!fragmentNode.hasAttribute(attribute.nodeName)) {
+                elementNode.removeAttribute(attribute.nodeName);
+            }
+        }
+    }
+    for (var _i = 0; _i < attributes.length; _i++) {
+        var _attribute = attributes[_i];
+        elementNode.setAttribute(_attribute.nodeName, _attribute.nodeValue);
+    }
 }
 
 function updateElement(elementNode, fragmentNode) {
     var elClone = elementNode.cloneNode(false);
     var frClone = fragmentNode.cloneNode(false);
     if (!elClone.isEqualNode(frClone)) {
+        if ((0, _webComponents.isCustomComponent)(elementNode)) {
+            return updateAttributes(elementNode, fragmentNode);
+        }
         return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
     }
     updateChildren(elementNode, fragmentNode);
@@ -854,13 +881,19 @@ function createFragmentFromStr(tpl) {
 }
 
 function render() {
+    if (this.isRendering) {
+        return;
+    }
+    this.isRendering = true;
+
     if (this.isShadow && !this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
     }
     var renderRes = this.render();
     var root = this.isShadow ? this.shadowRoot : this;
     var fragment = typeof renderRes === "string" ? createFragmentFromStr(renderRes) : renderRes;
-    if (!nodeConnected(this)) {
+    if (!this.mounted) {
+        this.mounted = true;
         root.innerHTML = "<style>" + this.styles + "</style>";
         root.appendChild(fragment.content);
     } else {
@@ -869,6 +902,8 @@ function render() {
         fragment.content.insertBefore(style, fragment.content.firstChild);
         updateChildren(root, fragment.content);
     }
+
+    this.isRendering = false;
 }
 
 /***/ })

@@ -1,7 +1,7 @@
 // @flow
 
 import {subscribe, getState} from "./store"
-import {render} from "./render-queue"
+import {render} from "./render"
 import {propsMap} from "./tag"
 
 function parseAttributes(attributes: NamedNodeMap): Object {
@@ -47,12 +47,7 @@ export default class Component extends HTMLElement {
 
     state = {};
 
-    constructor() {
-        super();
-
-        this.subscribeToStore();
-        render.call(this)
-    }
+    mounted = false;
 
     render() {
         return ''
@@ -71,6 +66,9 @@ export default class Component extends HTMLElement {
     }
 
     connectedCallback() {
+        this.subscribeToStore();
+        render.call(this)
+
         this.connected()
     }
 
@@ -96,6 +94,7 @@ export default class Component extends HTMLElement {
     adopted() {}
 
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string) {
+        console.log("!!!!!!!!!!!!!!!!!!! attributes changed");
         this.propsChanged(
             {
                 ...this.props,
