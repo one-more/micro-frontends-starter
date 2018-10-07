@@ -61,11 +61,66 @@ module.exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+
+var defaultImplementation = {
+    registerComponent: function registerComponent(name, component) {
+        customElements.define(name, component);
+    },
+    isCustomComponent: function isCustomComponent(node) {
+        return node.nodeName.includes("-");
+    }
+};
+
+var currentImplementation = defaultImplementation;
+
+var registerComponent = function registerComponent(name, component) {
+    return currentImplementation.registerComponent(name, component);
+};
+
+var setImplementation = exports.setImplementation = function setImplementation(implementation) {
+    currentImplementation = implementation;
+};
+
+var currentReadyCheck = function currentReadyCheck() {
+    if ('customElements' in window) {
+        return Promise.resolve();
+    }
+    return new Promise() < null > function (resolve) {
+        __webpack_require__(4).then(function () {
+            window.addEventListener('WebComponentsReady', resolve);
+        });
+    };
+};
+
+var componentsReady = exports.componentsReady = function componentsReady() {
+    return currentReadyCheck();
+};
+
+var setReadyCheck = exports.setReadyCheck = function setReadyCheck(readyCheck) {
+    currentReadyCheck = readyCheck;
+};
+
+exports.default = registerComponent;
+var isCustomComponent = exports.isCustomComponent = function isCustomComponent(node) {
+    return currentImplementation.isCustomComponent(node);
+};
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -157,7 +212,7 @@ var getState = exports.getState = function getState(key) {
 };
 
 /***/ }),
-/* 1 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -344,7 +399,7 @@ function setEventsHandler(handler) {
 }
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -354,7 +409,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _webComponents = __webpack_require__(3);
+var _webComponents = __webpack_require__(0);
 
 Object.defineProperty(exports, "changeWebComponentsImplemenation", {
     enumerable: true,
@@ -381,7 +436,7 @@ Object.defineProperty(exports, "registerComponent", {
     }
 });
 
-var _store = __webpack_require__(0);
+var _store = __webpack_require__(1);
 
 Object.defineProperty(exports, "changeStoreImplementation", {
     enumerable: true,
@@ -414,7 +469,7 @@ Object.defineProperty(exports, "getState", {
     }
 });
 
-var _tag = __webpack_require__(1);
+var _tag = __webpack_require__(2);
 
 Object.defineProperty(exports, "html", {
     enumerable: true,
@@ -463,61 +518,6 @@ Object.defineProperty(exports, "Component", {
 });
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-
-var defaultImplementation = {
-    registerComponent: function registerComponent(name, component) {
-        customElements.define(name, component);
-    },
-    isCustomComponent: function isCustomComponent(node) {
-        return node.nodeName.includes("-");
-    }
-};
-
-var currentImplementation = defaultImplementation;
-
-var registerComponent = function registerComponent(name, component) {
-    return currentImplementation.registerComponent(name, component);
-};
-
-var setImplementation = exports.setImplementation = function setImplementation(implementation) {
-    currentImplementation = implementation;
-};
-
-var currentReadyCheck = function currentReadyCheck() {
-    if ('customElements' in window) {
-        return Promise.resolve();
-    }
-    return new Promise() < null > function (resolve) {
-        __webpack_require__(4).then(function () {
-            window.addEventListener('WebComponentsReady', resolve);
-        });
-    };
-};
-
-var componentsReady = exports.componentsReady = function componentsReady() {
-    return currentReadyCheck();
-};
-
-var setReadyCheck = exports.setReadyCheck = function setReadyCheck(readyCheck) {
-    currentReadyCheck = readyCheck;
-};
-
-exports.default = registerComponent;
-var isCustomComponent = exports.isCustomComponent = function isCustomComponent(node) {
-    return currentImplementation.isCustomComponent(node);
-};
 
 /***/ }),
 /* 4 */
@@ -582,11 +582,11 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _store = __webpack_require__(0);
+var _store = __webpack_require__(1);
 
-var _render = __webpack_require__(9);
+var _render = __webpack_require__(6);
 
-var _tag = __webpack_require__(1);
+var _tag = __webpack_require__(2);
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -768,9 +768,10 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: "attributeChangedCallback",
         value: function attributeChangedCallback(attributeName, oldValue, newValue) {
-            console.log("!!!!!!!!!!!!!!!!!!! attributes changed");
-            this.propsChanged(_extends({}, this.props, _defineProperty({}, attributeName, newValue)));
-            _render.render.call(this);
+            if (this.mounted && oldValue != newValue) {
+                this.propsChanged(_extends({}, this.props, _defineProperty({}, attributeName, newValue)));
+                _render.render.call(this);
+            }
         }
     }, {
         key: "propsChanged",
@@ -803,6 +804,16 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
         get: function get() {
             return "";
         }
+    }], [{
+        key: "observedAttributes",
+        get: function get() {
+            return this.observableProps;
+        }
+    }, {
+        key: "observableProps",
+        get: function get() {
+            return [];
+        }
     }]);
 
     return Component;
@@ -811,10 +822,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
 exports.default = Component;
 
 /***/ }),
-/* 6 */,
-/* 7 */,
-/* 8 */,
-/* 9 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -825,7 +833,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.render = render;
 
-var _webComponents = __webpack_require__(3);
+var _webComponents = __webpack_require__(0);
 
 function updateAttributes(elementNode, fragmentNode) {
     var attributes = fragmentNode.attributes;
@@ -848,10 +856,7 @@ function updateElement(elementNode, fragmentNode) {
     var elClone = elementNode.cloneNode(false);
     var frClone = fragmentNode.cloneNode(false);
     if (!elClone.isEqualNode(frClone)) {
-        if ((0, _webComponents.isCustomComponent)(elementNode)) {
-            return updateAttributes(elementNode, fragmentNode);
-        }
-        return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
+        return updateAttributes(elementNode, fragmentNode);
     }
     updateChildren(elementNode, fragmentNode);
 }
@@ -881,11 +886,6 @@ function createFragmentFromStr(tpl) {
 }
 
 function render() {
-    if (this.isRendering) {
-        return;
-    }
-    this.isRendering = true;
-
     if (this.isShadow && !this.shadowRoot) {
         this.attachShadow({ mode: 'open' });
     }
@@ -893,9 +893,9 @@ function render() {
     var root = this.isShadow ? this.shadowRoot : this;
     var fragment = typeof renderRes === "string" ? createFragmentFromStr(renderRes) : renderRes;
     if (!this.mounted) {
-        this.mounted = true;
         root.innerHTML = "<style>" + this.styles + "</style>";
         root.appendChild(fragment.content);
+        this.mounted = true;
     } else {
         var style = document.createElement("style");
         style.innerHTML = this.styles;

@@ -13,7 +13,7 @@ export default class TodoItem extends Component {
         return this.props.done === "true"
     }
 
-    static get observedAttributes() {
+    static get observableProps() {
         return ['id', 'done', 'toggle', 'destroy'];
     }
 
@@ -27,7 +27,7 @@ export default class TodoItem extends Component {
                         onchange="${this.props.toggle}"
                         ${this.done ? 'checked' : ''}
                     >
-                    <label>${this.innerHTML}</label>
+                    <label>${this.props.text}</label>
                     <button 
                         class="destroy"
                         onclick="${this.props.destroy}"

@@ -28,16 +28,10 @@ function updateElement(elementNode: Node, fragmentNode: Node): void {
     const elClone = elementNode.cloneNode(false);
     const frClone = fragmentNode.cloneNode(false);
     if (!elClone.isEqualNode(frClone)) {
-        if (isCustomComponent(elementNode)) {
-            return updateAttributes(
-                elementNode,
-                fragmentNode
-            )
-        }
-        return (elementNode.parentNode: any).replaceChild(
-            fragmentNode,
+        return updateAttributes(
             elementNode,
-        );
+            fragmentNode
+        )
     }
     updateChildren(
         elementNode,
@@ -78,11 +72,6 @@ function createFragmentFromStr(tpl: string): HTMLTemplateElement {
 }
 
 export function render() {
-    if (this.isRendering) {
-        return
-    }
-    this.isRendering = true;
-
     if (this.isShadow && !this.shadowRoot) {
         this.attachShadow({mode: 'open'});
     }
@@ -90,9 +79,9 @@ export function render() {
     const root = this.isShadow ? (this.shadowRoot: any) : this;
     const fragment = typeof renderRes === "string" ? createFragmentFromStr(renderRes) : renderRes;
     if (!this.mounted) {
-        this.mounted = true;
         root.innerHTML = `<style>${this.styles}</style>`;
         root.appendChild(fragment.content);
+        this.mounted = true;
     } else {
         const style = document.createElement("style");
         style.innerHTML = this.styles;

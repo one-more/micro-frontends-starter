@@ -41,6 +41,14 @@ export default class Component extends HTMLElement {
         return ""
     }
 
+    static get observedAttributes() {
+        return this.observableProps
+    }
+
+    static get observableProps() {
+        return []
+    }
+
     __defaultProps = {};
 
     subscriptions = [];
@@ -94,14 +102,15 @@ export default class Component extends HTMLElement {
     adopted() {}
 
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string) {
-        console.log("!!!!!!!!!!!!!!!!!!! attributes changed");
-        this.propsChanged(
-            {
-                ...this.props,
-                [attributeName]: newValue,
-            }
-        );
-        render.call(this)
+        if (this.mounted && oldValue != newValue) {
+            this.propsChanged(
+                {
+                    ...this.props,
+                    [attributeName]: newValue,
+                }
+            );
+            render.call(this)
+        }
     }
 
     propsChanged(newProps: Object) {}

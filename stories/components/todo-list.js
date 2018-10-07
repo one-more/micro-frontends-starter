@@ -142,8 +142,8 @@ export default class TodoList extends Component {
                                     toggle="${this.state[KEY].toggle.bind(null, item.id)}"
                                     destroy="${this.state[KEY].remove.bind(null, item.id)}"
                                     id="${item.id}"
+                                    text="${item.text}"
                                 >
-                                    ${item.text}
                                 </todo-item>    
                             `}
                         </template>
