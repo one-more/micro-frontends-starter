@@ -835,6 +835,35 @@ exports.render = render;
 
 var _webComponents = __webpack_require__(0);
 
+function contentDiffer(elementNode, fragmentNode) {
+    return elementNode.innerText !== fragmentNode.innerText && elementNode.innerHTML !== fragmentNode.innerHTML;
+}
+
+function childrenChangedCount(elementNode, fragmentNode) {
+    if (elementNode.childNodes.length > fragmentNode.childNodes.length) {
+        return fragmentNode.childNodes.length;
+    }
+    var changed = 0;
+    for (var i = 0; i < elementNode.childNodes.length; i++) {
+        var elClone = elementNode.childNodes[i].cloneNode(false);
+        var frClone = fragmentNode.childNodes[i].cloneNode(false);
+        if (!elClone.isEqualNode(frClone)) {
+            if (!isEmptyNode(elClone) && !isEmptyNode(frClone)) {
+                changed++;
+            }
+        }
+    }
+    return changed;
+}
+
+function appendChildren(elementNode, fragmentNode) {
+    var fragment = document.createDocumentFragment();
+    for (var i = elementNode.childNodes.length; i < fragmentNode.childNodes.length; i++) {
+        fragment.appendChild(fragmentNode.childNodes[i]);
+    }
+    elementNode.appendChild(fragment);
+}
+
 function updateAttributes(elementNode, fragmentNode) {
     var attributes = fragmentNode.attributes;
     var elementAttributes = elementNode.attributes;
@@ -856,21 +885,45 @@ function updateElement(elementNode, fragmentNode) {
     var elClone = elementNode.cloneNode(false);
     var frClone = fragmentNode.cloneNode(false);
     if (!elClone.isEqualNode(frClone)) {
-        return updateAttributes(elementNode, fragmentNode);
+        if ((0, _webComponents.isCustomComponent)(elementNode)) {
+            return updateAttributes(elementNode, fragmentNode);
+        }
+        updateAttributes(elementNode, fragmentNode);
     }
     updateChildren(elementNode, fragmentNode);
 }
 
+function isEmptyNode(node) {
+    if (node.childNodes.length) {
+        return false;
+    }
+    if (node.innerText) {
+        return Boolean(node.innerText.trim()) === false;
+    }
+    if (node.innerHTML) {
+        return Boolean(node.innerHTML.trim()) === false;
+    }
+    return true;
+}
+
 function nodeFilter(node) {
     if (node) {
-        return (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) && node.nodeName !== "STYLE";
+        return (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) && node.nodeName !== "STYLE" && !isEmptyNode(node);
     }
     return false;
 }
 
 function updateChildren(elementNode, fragmentNode) {
     if (elementNode.childNodes.length !== fragmentNode.childNodes.length) {
-        return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
+        if (childrenChangedCount(elementNode, fragmentNode) > 0) {
+            return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
+        }
+        return appendChildren(elementNode, fragmentNode);
+    }
+    if (elementNode.childNodes.length === fragmentNode.childNodes.length === 0) {
+        if (contentDiffer(elementNode, fragmentNode)) {
+            return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
+        }
     }
     var elementNodes = Array.from(elementNode.childNodes).filter(nodeFilter);
     var fragmentNodes = Array.from(fragmentNode.childNodes).filter(nodeFilter);
