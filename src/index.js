@@ -32,4 +32,6 @@ export {
     removeStorage
 } from "./storage"
 
+export {bind} from "./bind"
+
 export {default as Component} from "./Component"

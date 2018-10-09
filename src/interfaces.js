@@ -10,3 +10,8 @@ export interface Component {
 export interface TemplateHandler {
     call(node: Node, args: any[]): void
 }
+
+export interface WebComponents {
+    registerComponent(name: string, component: Function): void,
+    isCustomComponent(node: Node): boolean
+}

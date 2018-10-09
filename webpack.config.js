@@ -1,10 +1,13 @@
 const path = require("path");
 
 module.exports = {
-    entry: "./src/index.js",
+    entry: {
+        main: "./src/index.js",
+        "polyfilled": "./src/with-polyfill"
+    },
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "main.js",
+        filename: "[name].js",
         library: "muskot",
         libraryTarget: "commonjs2"
     },

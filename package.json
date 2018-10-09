@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --coverage",
-    "build": "webpack -w",
+    "build": "webpack -w -p",
     "flow": "flow",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"

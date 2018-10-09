@@ -1,13 +1,16 @@
 // @flow
 
-interface Implemetation {
-    registerComponent(name: string, component: Function): void,
-    isCustomComponent(node: Node): boolean
-}
+import type {WebComponents as Implementation} from "./interfaces"
 
-const defaultImplementation: Implemetation = {
-    registerComponent(name: string, component: Function) {
-        customElements.define(name, component);
+const defaultImplementation: Implementation = {
+    registerComponent(name: string, component: Class<Element>) {
+        if ('customElements' in window) {
+            customElements.define(name, component);
+        } else {
+            currentReadyCheck().then(() => {
+                registerComponent(name, component)
+            })
+        }
     },
     isCustomComponent(node: Node) {
         return node.nodeName.includes("-")
@@ -16,24 +19,15 @@ const defaultImplementation: Implemetation = {
 
 let currentImplementation = defaultImplementation;
 
-const registerComponent = (name: string, component: Function) => {
+const registerComponent = (name: string, component: Class<Element>) => {
     return currentImplementation.registerComponent(name, component);
 };
 
-export const setImplementation = (implementation: Implemetation) => {
+export const setImplementation = (implementation: Implementation) => {
     currentImplementation = implementation;
 };
 
-let currentReadyCheck = () => {
-    if ('customElements' in window) {
-        return Promise.resolve()
-    }
-    return new Promise<null>((resolve: Function) => {
-        require("@webcomponents/custom-elements").then(() => {
-            window.addEventListener('WebComponentsReady', resolve);
-        })
-    })
-};
+let currentReadyCheck = () => Promise.resolve();
 
 export const componentsReady = () => {
     return currentReadyCheck()
