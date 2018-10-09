@@ -2,7 +2,8 @@
 
 import {subscribe, getState} from "./store"
 import {render} from "./render"
-import {propsMap} from "./tag"
+import {storage} from "./storage"
+import {clearEventsStorage, clearPropsStorage} from "./utils";
 
 function parseAttributes(attributes: NamedNodeMap): Object {
     const result = {};
@@ -25,7 +26,7 @@ export default class Component extends HTMLElement {
         return {
             ...this.__defaultProps,
             ...parseAttributes(this.attributes),
-            ...(propsMap.get(this) || {})
+            ...(storage.props.get(this) || {})
         }
     }
 
@@ -75,7 +76,7 @@ export default class Component extends HTMLElement {
 
     connectedCallback() {
         this.subscribeToStore();
-        render.call(this)
+        render.call(this);
 
         this.connected()
     }
@@ -86,6 +87,8 @@ export default class Component extends HTMLElement {
         for (const subscription of this.subscriptions) {
             subscription.unsubscribe()
         }
+        clearPropsStorage();
+        clearEventsStorage();
 
         this.disconnected()
     }

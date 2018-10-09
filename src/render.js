@@ -2,9 +2,14 @@
 
 import {isCustomComponent} from "./web-components"
 
+function nodeEquals(elementNode: Node, fragmentNode: Node): boolean {
+    const elClone = elementNode.cloneNode(false);
+    const frClone = fragmentNode.cloneNode(false);
+    return elClone.isEqualNode(frClone)
+}
+
 function contentDiffer(elementNode: Node, fragmentNode: Node): boolean {
-    return elementNode.innerText !== fragmentNode.innerText &&
-        (elementNode: any).innerHTML !== (fragmentNode: any).innerHTML
+    return elementNode.isEqualNode(fragmentNode) === false
 }
 
 function childrenChangedCount(elementNode: Node, fragmentNode: Node): number {
@@ -15,7 +20,7 @@ function childrenChangedCount(elementNode: Node, fragmentNode: Node): number {
     for (let i = 0; i < elementNode.childNodes.length; i++) {
         const elClone = elementNode.childNodes[i].cloneNode(false);
         const frClone = fragmentNode.childNodes[i].cloneNode(false);
-        if (!elClone.isEqualNode(frClone)) {
+        if (!nodeEquals(elementNode.childNodes[i], fragmentNode.childNodes[i])) {
             if (!isEmptyNode(elClone) && !isEmptyNode(frClone)) {
                 changed++
             }
@@ -37,8 +42,8 @@ function appendChildren(elementNode: Node, fragmentNode: Node): void {
 }
 
 function updateAttributes(elementNode: Node, fragmentNode: Node): void {
-    const attributes = (fragmentNode: any).attributes;
-    const elementAttributes = (elementNode: any).attributes;
+    const attributes = (fragmentNode: any).attributes || [];
+    const elementAttributes = (elementNode: any).attributes || [];
     if (elementAttributes.length > attributes.length) {
         for (let i = 0; i < elementAttributes.length; i++) {
             const attribute = elementAttributes[i];
@@ -59,9 +64,7 @@ function updateAttributes(elementNode: Node, fragmentNode: Node): void {
 }
 
 function updateElement(elementNode: Node, fragmentNode: Node): void {
-    const elClone = elementNode.cloneNode(false);
-    const frClone = fragmentNode.cloneNode(false);
-    if (!elClone.isEqualNode(frClone)) {
+    if (!nodeEquals(elementNode, fragmentNode)) {
         if (isCustomComponent(elementNode)) {
             return updateAttributes(
                 elementNode,
@@ -89,6 +92,9 @@ function isEmptyNode(node: Node): boolean {
     if ((node: any).innerHTML) {
         return Boolean((node: any).innerHTML.trim()) === false
     }
+    if ((node: any).textContent) {
+        return Boolean((node: any).textContent.trim()) === false
+    }
     return true
 }
 
@@ -112,7 +118,7 @@ function updateChildren(elementNode: Node, fragmentNode: Node): void {
         }
         return appendChildren(elementNode, fragmentNode)
     }
-    if (elementNode.childNodes.length === fragmentNode.childNodes.length === 0) {
+    if (elementNode.childNodes.length === 0 && fragmentNode.childNodes.length === 0) {
         if (contentDiffer(elementNode, fragmentNode)) {
             return (elementNode.parentNode: any).replaceChild(
                 fragmentNode,
@@ -159,6 +165,4 @@ export function render() {
             fragment.content
         )
     }
-
-    this.isRendering = false;
 }

@@ -224,126 +224,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 exports.default = html;
-exports.addTemplateHandler = addTemplateHandler;
-exports.accessHandler = accessHandler;
-exports.unloadHandler = unloadHandler;
-exports.setEventsHandler = setEventsHandler;
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var propsMap = exports.propsMap = new Map();
-
-function clearPropsMap() {
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-        for (var _iterator = propsMap.keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var key = _step.value;
-
-            if (!document.contains(key)) {
-                propsMap.delete(key);
-            }
-        }
-    } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-    } finally {
-        try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-                _iterator.return();
-            }
-        } finally {
-            if (_didIteratorError) {
-                throw _iteratorError;
-            }
-        }
-    }
-}
-
-var EventsTagHandler = {
-    call: function call(node, args) {
-        var attributes = node.attributes || [];
-        for (var i = 0; i < attributes.length; i++) {
-            var attribute = attributes[i];
-            if (attribute.nodeName.startsWith("on")) {
-                var match = attribute.nodeValue.match(/__ARG__(\d+)/);
-                if (match && match[1]) {
-                    var index = Number(match[1]);
-                    var listener = args[index];
-                    if (typeof listener === "function") {
-                        node.removeAttribute(attribute.nodeName);
-                        node.addEventListener(attribute.nodeName.toLowerCase().slice(2), listener);
-                    }
-                }
-            }
-        }
-    }
-};
-
-var MapHandler = {
-    call: function call(node, args) {
-        if (node instanceof HTMLTemplateElement) {
-            if (node.hasAttribute("map")) {
-                var match = String(node.getAttribute("map")).match(/__ARG__(\d+)/);
-                if (match && match[1]) {
-                    var index = Number(match[1]);
-                    var arr = args[index];
-                    var tpl = node.innerHTML;
-                    var fragment = document.createDocumentFragment();
-                    arr.forEach(function (el) {
-                        return tpl.replace(/__ARG__(\d+)/g, function (match, index) {
-                            var arg = args[index];
-                            if (typeof arg === "function") {
-                                var tplCall = arg(el);
-                                if (tplCall instanceof HTMLTemplateElement) {
-                                    fragment.appendChild(tplCall.content);
-                                } else {
-                                    var tmpTpl = document.createElement("template");
-                                    tmpTpl.innerHTML = tplCall;
-                                    fragment.appendChild(tmpTpl.content);
-                                }
-                            }
-                            return arg;
-                        });
-                    });
-                    // $FlowFixMe
-                    node.parentNode.replaceChild(fragment, node);
-                }
-            }
-        }
-    }
-};
-
-var PropsHandler = {
-    call: function call(node, args) {
-        var attributes = node.attributes || [];
-        for (var i = 0; i < attributes.length; i++) {
-            var attribute = attributes[i];
-            var match = attribute.nodeValue.match(/__ARG__(\d+)/);
-            if (match && match[1]) {
-                var index = Number(match[1]);
-                var props = propsMap.get(node) || {};
-                node.removeAttribute(attribute.nodeName);
-                propsMap.set(node, _extends({}, props, _defineProperty({}, attribute.nodeName, args[index])));
-            }
-        }
-    }
-};
-
-var coreHandlers = {
-    events: EventsTagHandler,
-    map: MapHandler,
-    props: PropsHandler
-};
-
-var customHandlers = {};
-
-var handlers = [coreHandlers.map.call, coreHandlers.events.call, coreHandlers.props.call];
+var _handlers = __webpack_require__(7);
 
 function html(strings) {
     for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
@@ -364,38 +247,8 @@ function html(strings) {
     }
     var template = document.createElement("template");
     template.innerHTML = tpl;
-    callHandlers(template.content, args);
+    (0, _handlers.callHandlers)(template.content, args);
     return template;
-}
-
-function callHandlers(element, args) {
-    handlers.forEach(function (handler) {
-        handler(element, args);
-        for (var i = 0; i < element.childNodes.length; i++) {
-            callHandlers(element.childNodes[i], args);
-        }
-    });
-}
-
-function addTemplateHandler(key, handler) {
-    customHandlers[key] = handler;
-    // $FlowFixMe
-    handlers.unshift(handler.call);
-}
-
-function accessHandler(key) {
-    return customHandlers[key];
-}
-
-function unloadHandler(key) {
-    var handler = customHandlers[key];
-    handlers = handlers.filter(function (el) {
-        return el !== handler.call;
-    });
-}
-
-function setEventsHandler(handler) {
-    coreHandlers.events = handler;
 }
 
 /***/ }),
@@ -469,6 +322,33 @@ Object.defineProperty(exports, "getState", {
     }
 });
 
+var _handlers = __webpack_require__(7);
+
+Object.defineProperty(exports, "addTemplateHandler", {
+    enumerable: true,
+    get: function get() {
+        return _handlers.addTemplateHandler;
+    }
+});
+Object.defineProperty(exports, "setCoreHandler", {
+    enumerable: true,
+    get: function get() {
+        return _handlers.setCoreHandler;
+    }
+});
+Object.defineProperty(exports, "unloadHandler", {
+    enumerable: true,
+    get: function get() {
+        return _handlers.unloadHandler;
+    }
+});
+Object.defineProperty(exports, "accessHandler", {
+    enumerable: true,
+    get: function get() {
+        return _handlers.accessHandler;
+    }
+});
+
 var _tag = __webpack_require__(2);
 
 Object.defineProperty(exports, "html", {
@@ -477,34 +357,25 @@ Object.defineProperty(exports, "html", {
         return _interopRequireDefault(_tag).default;
     }
 });
-Object.defineProperty(exports, "addTemplateHandler", {
+
+var _storage = __webpack_require__(8);
+
+Object.defineProperty(exports, "getStorage", {
     enumerable: true,
     get: function get() {
-        return _tag.addTemplateHandler;
+        return _storage.getStorage;
     }
 });
-Object.defineProperty(exports, "setEventsHandler", {
+Object.defineProperty(exports, "addStorage", {
     enumerable: true,
     get: function get() {
-        return _tag.setEventsHandler;
+        return _storage.addStorage;
     }
 });
-Object.defineProperty(exports, "unloadHandler", {
+Object.defineProperty(exports, "removeStorage", {
     enumerable: true,
     get: function get() {
-        return _tag.unloadHandler;
-    }
-});
-Object.defineProperty(exports, "accessHandler", {
-    enumerable: true,
-    get: function get() {
-        return _tag.accessHandler;
-    }
-});
-Object.defineProperty(exports, "bind", {
-    enumerable: true,
-    get: function get() {
-        return _tag.bind;
+        return _storage.removeStorage;
     }
 });
 
@@ -586,7 +457,9 @@ var _store = __webpack_require__(1);
 
 var _render = __webpack_require__(6);
 
-var _tag = __webpack_require__(2);
+var _storage = __webpack_require__(8);
+
+var _utils = __webpack_require__(9);
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -749,6 +622,9 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
                 }
             }
 
+            (0, _utils.clearPropsStorage)();
+            (0, _utils.clearEventsStorage)();
+
             this.disconnected();
         }
     }, {
@@ -789,7 +665,7 @@ var Component = _fixBabelExtend(function (_HTMLElement) {
     }, {
         key: "props",
         get: function get() {
-            return _extends({}, this.__defaultProps, parseAttributes(this.attributes), _tag.propsMap.get(this) || {});
+            return _extends({}, this.__defaultProps, parseAttributes(this.attributes), _storage.storage.props.get(this) || {});
         },
         set: function set(props) {
             this.__defaultProps = props;
@@ -835,8 +711,14 @@ exports.render = render;
 
 var _webComponents = __webpack_require__(0);
 
+function nodeEquals(elementNode, fragmentNode) {
+    var elClone = elementNode.cloneNode(false);
+    var frClone = fragmentNode.cloneNode(false);
+    return elClone.isEqualNode(frClone);
+}
+
 function contentDiffer(elementNode, fragmentNode) {
-    return elementNode.innerText !== fragmentNode.innerText && elementNode.innerHTML !== fragmentNode.innerHTML;
+    return elementNode.isEqualNode(fragmentNode) === false;
 }
 
 function childrenChangedCount(elementNode, fragmentNode) {
@@ -847,7 +729,7 @@ function childrenChangedCount(elementNode, fragmentNode) {
     for (var i = 0; i < elementNode.childNodes.length; i++) {
         var elClone = elementNode.childNodes[i].cloneNode(false);
         var frClone = fragmentNode.childNodes[i].cloneNode(false);
-        if (!elClone.isEqualNode(frClone)) {
+        if (!nodeEquals(elementNode.childNodes[i], fragmentNode.childNodes[i])) {
             if (!isEmptyNode(elClone) && !isEmptyNode(frClone)) {
                 changed++;
             }
@@ -865,8 +747,8 @@ function appendChildren(elementNode, fragmentNode) {
 }
 
 function updateAttributes(elementNode, fragmentNode) {
-    var attributes = fragmentNode.attributes;
-    var elementAttributes = elementNode.attributes;
+    var attributes = fragmentNode.attributes || [];
+    var elementAttributes = elementNode.attributes || [];
     if (elementAttributes.length > attributes.length) {
         for (var i = 0; i < elementAttributes.length; i++) {
             var attribute = elementAttributes[i];
@@ -882,9 +764,7 @@ function updateAttributes(elementNode, fragmentNode) {
 }
 
 function updateElement(elementNode, fragmentNode) {
-    var elClone = elementNode.cloneNode(false);
-    var frClone = fragmentNode.cloneNode(false);
-    if (!elClone.isEqualNode(frClone)) {
+    if (!nodeEquals(elementNode, fragmentNode)) {
         if ((0, _webComponents.isCustomComponent)(elementNode)) {
             return updateAttributes(elementNode, fragmentNode);
         }
@@ -903,6 +783,9 @@ function isEmptyNode(node) {
     if (node.innerHTML) {
         return Boolean(node.innerHTML.trim()) === false;
     }
+    if (node.textContent) {
+        return Boolean(node.textContent.trim()) === false;
+    }
     return true;
 }
 
@@ -920,7 +803,7 @@ function updateChildren(elementNode, fragmentNode) {
         }
         return appendChildren(elementNode, fragmentNode);
     }
-    if (elementNode.childNodes.length === fragmentNode.childNodes.length === 0) {
+    if (elementNode.childNodes.length === 0 && fragmentNode.childNodes.length === 0) {
         if (contentDiffer(elementNode, fragmentNode)) {
             return elementNode.parentNode.replaceChild(fragmentNode, elementNode);
         }
@@ -955,8 +838,265 @@ function render() {
         fragment.content.insertBefore(style, fragment.content.firstChild);
         updateChildren(root, fragment.content);
     }
+}
 
-    this.isRendering = false;
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+exports.callHandlers = callHandlers;
+exports.addTemplateHandler = addTemplateHandler;
+exports.accessHandler = accessHandler;
+exports.unloadHandler = unloadHandler;
+exports.setCoreHandler = setCoreHandler;
+
+var _storage = __webpack_require__(8);
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var propsStorage = _storage.storage[_storage.storageKeys.PROPS];
+var eventsStorage = _storage.storage[_storage.storageKeys.EVENTS];
+
+var EventsTagHandler = {
+    call: function call(node, args) {
+        var attributes = node.attributes || [];
+        for (var i = 0; i < attributes.length; i++) {
+            var attribute = attributes[i];
+            if (attribute.nodeName.startsWith("on")) {
+                var match = attribute.nodeValue.match(/__ARG__(\d+)/);
+                if (match && match[1]) {
+                    var index = Number(match[1]);
+                    var listener = args[index];
+                    if (typeof listener === "function") {
+                        node.removeAttribute(attribute.nodeName);
+                        var eventName = attribute.nodeName.toLowerCase().slice(2);
+                        node.addEventListener(eventName, listener);
+
+                        var listeners = eventsStorage.get(node) || {};
+                        eventsStorage.set(node, _extends({}, listeners, _defineProperty({}, eventName, listener)));
+                    }
+                }
+            }
+        }
+    }
+};
+
+var MapHandler = {
+    call: function call(node, args) {
+        if (node instanceof HTMLTemplateElement) {
+            if (node.hasAttribute("map")) {
+                var match = String(node.getAttribute("map")).match(/__ARG__(\d+)/);
+                if (match && match[1]) {
+                    var index = Number(match[1]);
+                    var arr = args[index];
+                    var tpl = node.innerHTML;
+                    var fragment = document.createDocumentFragment();
+                    arr.forEach(function (el) {
+                        return tpl.replace(/__ARG__(\d+)/g, function (match, index) {
+                            var arg = args[index];
+                            if (typeof arg === "function") {
+                                var tplCall = arg(el);
+                                if (tplCall instanceof HTMLTemplateElement) {
+                                    fragment.appendChild(tplCall.content);
+                                } else {
+                                    var tmpTpl = document.createElement("template");
+                                    tmpTpl.innerHTML = tplCall;
+                                    fragment.appendChild(tmpTpl.content);
+                                }
+                            }
+                            return arg;
+                        });
+                    });
+                    // $FlowFixMe
+                    node.parentNode.replaceChild(fragment, node);
+                }
+            }
+        }
+    }
+};
+
+var PropsHandler = {
+    call: function call(node, args) {
+        var attributes = node.attributes || [];
+        for (var i = 0; i < attributes.length; i++) {
+            var attribute = attributes[i];
+            var match = attribute.nodeValue.match(/__ARG__(\d+)/);
+            if (match && match[1]) {
+                var index = Number(match[1]);
+                var props = propsStorage.get(node) || {};
+                node.removeAttribute(attribute.nodeName);
+                propsStorage.set(node, _extends({}, props, _defineProperty({}, attribute.nodeName, args[index])));
+            }
+        }
+    }
+};
+
+var coreHandlers = {
+    events: EventsTagHandler,
+    map: MapHandler,
+    props: PropsHandler
+};
+
+var customHandlers = {};
+
+var handlers = [coreHandlers.map.call, coreHandlers.events.call, coreHandlers.props.call];
+
+function callHandlers(element, args) {
+    handlers.forEach(function (handler) {
+        handler(element, args);
+        for (var i = 0; i < element.childNodes.length; i++) {
+            callHandlers(element.childNodes[i], args);
+        }
+    });
+}
+
+function addTemplateHandler(key, handler) {
+    customHandlers[key] = handler;
+    // $FlowFixMe
+    handlers.unshift(handler.call);
+}
+
+function accessHandler(key) {
+    return customHandlers[key];
+}
+
+function unloadHandler(key) {
+    var handler = customHandlers[key];
+    handlers = handlers.filter(function (el) {
+        return el !== handler.call;
+    });
+}
+
+function setCoreHandler(key, handler) {
+    coreHandlers[key] = handler;
+}
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _storage;
+
+exports.getStorage = getStorage;
+exports.addStorage = addStorage;
+exports.removeStorage = removeStorage;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var propsMap = new Map();
+
+var eventsMap = new Map();
+
+var storageKeys = exports.storageKeys = {
+    PROPS: "props",
+    EVENTS: "events"
+};
+
+var storage = exports.storage = (_storage = {}, _defineProperty(_storage, storageKeys.PROPS, propsMap), _defineProperty(_storage, storageKeys.EVENTS, eventsMap), _storage);
+
+function getStorage(key) {
+    return storage[key];
+}
+
+function addStorage(key, value) {
+    storage[key] = value;
+}
+
+function removeStorage(key) {
+    delete storage[key];
+}
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.clearPropsStorage = clearPropsStorage;
+exports.clearEventsStorage = clearEventsStorage;
+
+var _storage = __webpack_require__(8);
+
+var propsStorage = _storage.storage[_storage.storageKeys.PROPS];
+
+var eventsStorage = _storage.storage[_storage.storageKeys.EVENTS];
+
+function clearPropsStorage() {
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+        for (var _iterator = propsStorage.keys()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var key = _step.value;
+
+            if (!document.contains(key)) {
+                propsStorage.delete(key);
+            }
+        }
+    } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+                _iterator.return();
+            }
+        } finally {
+            if (_didIteratorError) {
+                throw _iteratorError;
+            }
+        }
+    }
+}
+
+function clearEventsStorage() {
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+        for (var _iterator2 = eventsStorage.keys()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var key = _step2.value;
+
+            if (!document.contains(key)) {
+                eventsStorage.delete(key);
+            }
+        }
+    } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+    } finally {
+        try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                _iterator2.return();
+            }
+        } finally {
+            if (_didIteratorError2) {
+                throw _iteratorError2;
+            }
+        }
+    }
 }
 
 /***/ })

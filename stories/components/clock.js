@@ -27,6 +27,7 @@ export default class Clock extends Component {
     }
 
     connected() {
+        this.state.clock.update();
         this.interval = setInterval(
             this.state.clock.update,
             1000,

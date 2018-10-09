@@ -16,12 +16,20 @@ export {
 } from "./store"
 
 export {
-    default as html,
     addTemplateHandler,
-    setEventsHandler,
+    setCoreHandler,
     unloadHandler,
     accessHandler,
-    bind
+} from "./handlers"
+
+export {
+    default as html,
 } from "./tag"
+
+export {
+    getStorage,
+    addStorage,
+    removeStorage
+} from "./storage"
 
 export {default as Component} from "./Component"

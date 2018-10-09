@@ -6,3 +6,7 @@ export interface Component {
     mounted: boolean,
     render(): string,
 }
+
+export interface TemplateHandler {
+    call(node: Node, args: any[]): void
+}
