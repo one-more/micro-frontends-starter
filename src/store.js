@@ -1,19 +1,6 @@
 // @flow
 
-interface Reducer {
-    state: any,
-    actions: {
-        [key: string]: Function
-    }
-}
-
-interface Store {
-    addReducer(key: string, reducer: Reducer): void,
-    removeReducer(key: string): boolean,
-    subscribe(key: string, cb: Function): {unsubscribe: Function},
-    getState(key: string): any,
-    migrate(newStore: Store): Store
-}
+import type {Store, Reducer} from "./interfaces"
 
 const stubImplementation: Store = {
     reducers: {},

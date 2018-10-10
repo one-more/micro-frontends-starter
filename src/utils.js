@@ -1,9 +1,9 @@
 // @flow
 
-import {storage, storageKeys} from "./storage";
+import {getStorage, storageKeys} from "./storage";
 
-const propsStorage = storage[storageKeys.PROPS];
-const eventsStorage = storage[storageKeys.EVENTS];
+const propsStorage = getStorage(storageKeys.PROPS);
+const eventsStorage = getStorage(storageKeys.EVENTS);
 
 export function clearPropsStorage(): void {
     for (const key of propsStorage.keys()) {

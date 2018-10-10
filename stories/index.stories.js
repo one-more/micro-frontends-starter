@@ -7,6 +7,7 @@ import "./components/clock"
 import "./components/greeter"
 import "./components/counter"
 import "./components/todo-list"
+import "./components/button"
 
 changeStoreImplementation(store);
 
@@ -16,3 +17,11 @@ storiesOf('Component', module)
     .add('without shadow dom', () => <x-greeter name="greeter!"></x-greeter>)
     .add('counter', () => <x-counter start="5"></x-counter>)
     .add('todo list', () => <todo-list></todo-list>)
+
+storiesOf('Button', module)
+    .add('default', () => <x-button>default btn</x-button>)
+    .add('size medium', () => <x-button size="m">medium btn</x-button>)
+    .add('size large', () => <x-button size="l">medium btn</x-button>)
+    .add('info', () => <x-button type="info">info btn</x-button>)
+    .add('danger', () => <x-button type="danger">danger btn</x-button>)
+    .add('success', () => <x-button type="success">success btn</x-button>)

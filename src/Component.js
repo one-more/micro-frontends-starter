@@ -2,8 +2,10 @@
 
 import {subscribe, getState} from "./store"
 import {render} from "./render"
-import {storage} from "./storage"
+import {getStorage, storageKeys} from "./storage"
 import {clearEventsStorage, clearPropsStorage} from "./utils";
+
+const propsStorage = getStorage(storageKeys.PROPS);
 
 function parseAttributes(attributes: NamedNodeMap): Object {
     const result = {};
@@ -26,7 +28,7 @@ export default class Component extends HTMLElement {
         return {
             ...this.__defaultProps,
             ...parseAttributes(this.attributes),
-            ...(storage.props.get(this) || {})
+            ...(propsStorage.get(this) || {})
         }
     }
 

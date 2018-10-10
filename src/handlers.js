@@ -1,10 +1,10 @@
 // @flow
 
 import type {TemplateHandler} from "./interfaces"
-import {storage, storageKeys} from "./storage"
+import {getStorage, storageKeys} from "./storage"
 
-const propsStorage = storage[storageKeys.PROPS];
-const eventsStorage = storage[storageKeys.EVENTS];
+const propsStorage = getStorage(storageKeys.PROPS);
+const eventsStorage = getStorage(storageKeys.EVENTS);
 
 const EventsTagHandler: TemplateHandler = {
     call: (node: any, args: any[]) => {

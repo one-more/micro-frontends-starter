@@ -23,13 +23,15 @@ export {
 } from "./handlers"
 
 export {
-    default as html,
+    html,
+    css
 } from "./tag"
 
 export {
     getStorage,
     addStorage,
-    removeStorage
+    removeStorage,
+    setStorageDriver
 } from "./storage"
 
 export {bind} from "./bind"

@@ -1,6 +1,6 @@
 // @flow
 
-import {addStorage, getStorage, storage} from "./storage"
+import {addStorage, getStorage} from "./storage"
 
 const KEY = "BOUNDS";
 const MAX_STORAGE_SIZE = 100;

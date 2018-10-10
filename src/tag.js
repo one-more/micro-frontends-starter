@@ -2,7 +2,7 @@
 
 import {callHandlers} from "./handlers";
 
-export default function html(strings: string[], ...args: any[]) {
+export function html(strings: string[], ...args: any[]) {
     if (!args.length) {
         return strings[0]
     }
@@ -22,4 +22,18 @@ export default function html(strings: string[], ...args: any[]) {
     template.innerHTML = tpl;
     callHandlers(template.content, args);
     return template
+}
+
+export function css(strings: string[], ...args: any[]) {
+    let result = '';
+    for (let i = 0; i < strings.length; i++) {
+        result += strings[i];
+        if (i < strings.length - 1) {
+            if (typeof args[i] === "function")
+                result += args[i]();
+            else
+                result += args[i]
+        }
+    }
+    return result
 }
