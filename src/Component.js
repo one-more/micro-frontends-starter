@@ -44,8 +44,18 @@ export default class Component extends HTMLElement {
         return ""
     }
 
-    static get observedAttributes() {
-        return this.observableProps
+    static get observedAttributes(): string[] {
+        return this.observableProps.map((prop: string): string => {
+            let res = "";
+            for (let i = 0; i < prop.length; i++) {
+                if (prop[i] === prop[i].toUpperCase()) {
+                    res += "-"+prop[i].toLowerCase()
+                } else {
+                    res += prop[i]
+                }
+            }
+            return res
+        })
     }
 
     static get observableProps() {

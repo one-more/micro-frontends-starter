@@ -1,6 +1,33 @@
 // @flow
 
 import {isCustomComponent} from "./web-components"
+import {getStorage, storageKeys} from "./storage"
+import shallowEqual from "./shallow-equal";
+
+const propsStorage = getStorage(storageKeys.PROPS);
+const eventsStorage = getStorage(storageKeys.EVENTS);
+
+function eventsEqual(elementNode: Node, fragmentNode: Node) {
+    const elementEvents = eventsStorage.get(elementNode);
+    const fragmentEvents = eventsStorage.get(fragmentNode);
+    if (elementEvents && fragmentEvents) {
+        const elementKeys = Object.keys(elementEvents);
+        const fragmentKeys = Object.keys(fragmentEvents);
+        if (elementKeys.length !== fragmentKeys.length) {
+            return false
+        }
+        for (const key of elementKeys) {
+            if (elementEvents[key] !== fragmentEvents[key]) {
+                return false
+            }
+        }
+        return true
+    }
+    if (elementEvents || fragmentEvents) {
+        return false
+    }
+    return true
+}
 
 function nodeEquals(elementNode: Node, fragmentNode: Node): boolean {
     const elClone = elementNode.cloneNode(false);
@@ -12,15 +39,40 @@ function contentDiffer(elementNode: Node, fragmentNode: Node): boolean {
     return elementNode.isEqualNode(fragmentNode) === false
 }
 
-function childrenChangedCount(elementNode: Node, fragmentNode: Node): number {
-    if (elementNode.childNodes.length > fragmentNode.childNodes.length) {
-        return fragmentNode.childNodes.length
+function elementsDeleted(elementNodes: Node[], fragmentNodes: Node[]): Array<Node> {
+    if (elementNodes.length > fragmentNodes.length) {
+        for (let i = 0; i < elementNodes.length; i++) {
+            if (elementNodes[i] && !fragmentNodes[i]) {
+                return [elementNodes[i]].concat(
+                    elementsDeleted(
+                        Array.from(elementNodes).slice(i + 1),
+                        Array.from(fragmentNodes).slice(i)
+                    )
+                )
+            }
+            if (!nodeEquals(elementNodes[i], fragmentNodes[i])) {
+                const deleted = elementsDeleted(
+                    Array.from(elementNodes).slice(i + 1),
+                    Array.from(fragmentNodes).slice(i)
+                );
+                if (deleted.length === 0) {
+                    return [elementNodes[i]]
+                }
+            }
+        }
+    }
+    return []
+}
+
+function childrenChangedCount(elementNodes: Node[], fragmentNodes: Node[]): number {
+    if (elementNodes.length > fragmentNodes.length) {
+        return fragmentNodes.length
     }
     let changed = 0;
-    for (let i = 0; i < elementNode.childNodes.length; i++) {
-        const elClone = elementNode.childNodes[i].cloneNode(false);
-        const frClone = fragmentNode.childNodes[i].cloneNode(false);
-        if (!nodeEquals(elementNode.childNodes[i], fragmentNode.childNodes[i])) {
+    for (let i = 0; i < elementNodes.length; i++) {
+        const elClone = elementNodes[i].cloneNode(false);
+        const frClone = fragmentNodes[i].cloneNode(false);
+        if (!nodeEquals(elementNodes[i], fragmentNodes[i])) {
             if (!isEmptyNode(elClone) && !isEmptyNode(frClone)) {
                 changed++
             }
@@ -29,11 +81,11 @@ function childrenChangedCount(elementNode: Node, fragmentNode: Node): number {
     return changed
 }
 
-function appendChildren(elementNode: Node, fragmentNode: Node): void {
+function appendChildren(elementNode: Node, elementChildren: Node[], fragmentChildren: Node[]): void {
     const fragment = document.createDocumentFragment();
-    for (let i = elementNode.childNodes.length; i< fragmentNode.childNodes.length; i++) {
+    for (let i = elementChildren.length; i < fragmentChildren.length; i++) {
         fragment.appendChild(
-            fragmentNode.childNodes[i]
+            fragmentChildren[i]
         )
     }
     elementNode.appendChild(
@@ -61,16 +113,27 @@ function updateAttributes(elementNode: Node, fragmentNode: Node): void {
             attribute.nodeValue
         );
     }
+    if (propsStorage.get(fragmentNode)) {
+        const elProps = propsStorage.get(elementNode);
+        const frProps = propsStorage.get(fragmentNode);
+        propsStorage.set(
+            elementNode,
+            frProps
+        );
+        if (!shallowEqual(elProps, frProps)) {
+            render.call((elementNode: any))
+        }
+    }
 }
 
 function updateElement(elementNode: Node, fragmentNode: Node): void {
+    if (isCustomComponent(elementNode)) {
+        return updateAttributes(
+            elementNode,
+            fragmentNode
+        )
+    }
     if (!nodeEquals(elementNode, fragmentNode)) {
-        if (isCustomComponent(elementNode)) {
-            return updateAttributes(
-                elementNode,
-                fragmentNode
-            )
-        }
         updateAttributes(
             elementNode,
             fragmentNode
@@ -83,6 +146,9 @@ function updateElement(elementNode: Node, fragmentNode: Node): void {
 }
 
 function isEmptyNode(node: Node): boolean {
+    if (node.nodeType !== Node.TEXT_NODE) {
+        return false
+    }
     if (node.childNodes.length) {
         return false
     }
@@ -109,16 +175,33 @@ function nodeFilter(node: Node): boolean {
 }
 
 function updateChildren(elementNode: Node, fragmentNode: Node): void {
-    if (elementNode.childNodes.length !== fragmentNode.childNodes.length) {
-        if (childrenChangedCount(elementNode, fragmentNode) > 0) {
+    const elementNodes = Array.from(elementNode.childNodes).filter(nodeFilter);
+    const fragmentNodes = Array.from(fragmentNode.childNodes).filter(nodeFilter);
+    if (elementNodes.length !== fragmentNodes.length) {
+        const deleted = elementsDeleted(
+            elementNodes,
+            fragmentNodes,
+        );
+        if (deleted.length === 1) {
+            (deleted[0].parentNode: any).removeChild(deleted[0]);
+            return updateChildren(
+                elementNode,
+                fragmentNode
+            )
+        }
+        if (childrenChangedCount(elementNodes, fragmentNodes) > 0) {
             return (elementNode.parentNode: any).replaceChild(
                 fragmentNode,
                 elementNode,
             );
         }
-        return appendChildren(elementNode, fragmentNode)
+        return appendChildren(
+            elementNode,
+            elementNodes,
+            fragmentNodes,
+        )
     }
-    if (elementNode.childNodes.length === 0 && fragmentNode.childNodes.length === 0) {
+    if (elementNodes.length === 0 && fragmentNodes.length === 0) {
         if (contentDiffer(elementNode, fragmentNode)) {
             return (elementNode.parentNode: any).replaceChild(
                 fragmentNode,
@@ -126,8 +209,6 @@ function updateChildren(elementNode: Node, fragmentNode: Node): void {
             );
         }
     }
-    const elementNodes = Array.from(elementNode.childNodes).filter(nodeFilter);
-    const fragmentNodes = Array.from(fragmentNode.childNodes).filter(nodeFilter);
     for (let i = 0; i < elementNodes.length; i++) {
         updateElement(
             elementNodes[i],

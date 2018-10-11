@@ -1,8 +1,9 @@
 import {
     Component, registerComponent,
-    registerReducer, html
+    registerReducer, html, bind
 } from "../../dist/main";
 import "./todo-item"
+import "./todo-footer"
 
 const KEY = 'todo-list';
 
@@ -28,21 +29,44 @@ function persist(state) {
     }
 }
 
+function allChecked(items) {
+    return items.length ? items.every(item => item.done) : false
+}
+
+function activeItems(items) {
+    return items.filter(item => !item.done)
+}
+
+function completedItems(items) {
+    return items.filter(item => item.done)
+}
+
+function filterItems(items, filter) {
+    switch (filter) {
+        case filters.ALL:
+            return items;
+        case filters.COMPLETED:
+            return completedItems(items);
+        case filters.ACTIVE:
+            return activeItems(items)
+    }
+}
+
+const filters = {
+    ALL: 'all',
+    ACTIVE: 'active',
+    COMPLETED: 'completed'
+};
+
 const reducer = {
     state: fromStorage(
         {
-            items: [
-                {
-                    id: 0,
-                    done: false,
-                    text: "first!"
-                },
-                {
-                    id: 1,
-                    done: false,
-                    text: "second!"
-                }
-            ]
+            items: [],
+            filtered: [],
+            allChecked: false,
+            filter: filters.ALL,
+            active: [],
+            completed: []
         }
     ),
     actions: {
@@ -52,42 +76,103 @@ const reducer = {
                 done: false,
                 text
             };
+            const items = state.items.concat(todo);
             return persist(
                 {
-                    items: state.items.concat(todo)
+                    ...state,
+                    items: items,
+                    active: state.active.concat(todo),
+                    filtered: filterItems(items, state.filter)
                 }
             )
         },
         toggle(state, id) {
+            const items = state.items.map(todo => {
+                if (todo.id === id) {
+                    return {
+                        ...todo,
+                        done: !todo.done
+                    }
+                }
+                return todo
+            });
             return persist(
                 {
-                    items: state.items.map(todo => {
-                        if (todo.id === id) {
-                            return {
-                                ...todo,
-                                done: !todo.done
-                            }
-                        }
-                        return todo
-                    })
+                    ...state,
+                    items,
+                    allChecked: allChecked(items),
+                    filtered: filterItems(items, state.filter),
+                    active: activeItems(items),
+                    completed: completedItems(items)
                 }
             )
         },
         remove(state, id) {
+            const items = state.items.filter(todo => todo.id !== id);
             return persist(
                 {
-                    items: state.items.filter(todo => todo.id !== id)
+                    ...state,
+                    items,
+                    filtered: filterItems(items, state.filter),
+                    active: activeItems(items),
+                    completed: completedItems(items)
                 }
             )
         },
         toggleAll(state) {
-            const allToggled = state.items.every(item => item.done);
+            const checkedAll = allChecked(state.items);
+            const items = state.items.map(el => ({
+                ...el,
+                done: !checkedAll
+            }));
             return persist(
                 {
-                    items: state.items.map(el => ({
-                        ...el,
-                        done: !allToggled
-                    })),
+                    ...state,
+                    items,
+                    allChecked: !checkedAll,
+                    filtered: filterItems(items, state.filter),
+                    active: activeItems(items),
+                    completed: completedItems(items)
+                }
+            )
+        },
+        filterAll(state) {
+            return persist(
+                {
+                    ...state,
+                    filtered: state.items,
+                    filter: filters.ALL
+                }
+            )
+        },
+        filterActive(state) {
+            return persist(
+                {
+                    ...state,
+                    filtered: state.active,
+                    filter: filters.ACTIVE
+                }
+            )
+        },
+        filterCompleted(state) {
+            return persist(
+                {
+                    ...state,
+                    filtered: state.completed,
+                    filter: filters.COMPLETED
+                }
+            )
+        },
+        clearCompleted(state) {
+            const filtered = activeItems(state.items);
+            return persist(
+                {
+                    ...state,
+                    items: filtered,
+                    filtered,
+                    active: filtered,
+                    completed: [],
+                    filter: filters.ALL
                 }
             )
         }
@@ -132,15 +217,16 @@ export default class TodoList extends Component {
                         type="checkbox" 
                         id="toggle-all"
                         onChange="${this.state[KEY].toggleAll}"
+                        ${this.state[KEY].allChecked ? 'checked' : ''}
                     >
                     <label for="toggle-all"></label>
                     <ul class="todo-list">
-                        <template map="${this.state[KEY].items}" >
+                        <template map="${this.state[KEY].filtered}" >
                             ${item => html`
                                 <todo-item
                                     done="${item.done}"
-                                    toggle="${this.state[KEY].toggle.bind(null, item.id)}"
-                                    destroy="${this.state[KEY].remove.bind(null, item.id)}"
+                                    toggle="${bind(this.state[KEY].toggle, item.id)}"
+                                    destroy="${bind(this.state[KEY].remove, item.id)}"
                                     id="${item.id}"
                                     text="${item.text}"
                                 >
@@ -149,6 +235,17 @@ export default class TodoList extends Component {
                         </template>
                     </ul>
                 </section>
+                <todo-footer
+                    active="${this.state[KEY].active}"
+                    completed="${this.state[KEY].completed}"
+                    items="${this.state[KEY].items}"
+                    filters="${filters}"
+                    filter="${this.state[KEY].filter}"
+                    filter-All="${this.state[KEY].filterAll}"
+                    filter-Active="${this.state[KEY].filterActive}"
+                    filter-Completed="${this.state[KEY].filterCompleted}"
+                    clear-Completed="${this.state[KEY].clearCompleted}"
+                ></todo-footer>
             </section>
         `
     }
@@ -299,7 +396,7 @@ button {
 	padding: 10px 27px 10px 27px;
 }
 
-.toggle-all:checked + label:before {
+.toggle-all[checked] + label:before {
 	color: #737373;
 }
 
@@ -363,7 +460,7 @@ button {
 	background-position: center left;
 }
 
-.todo-list li .toggle:checked + label {
+.todo-list li .toggle[checked] + label {
 	background-image: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23bddad5%22%20stroke-width%3D%223%22/%3E%3Cpath%20fill%3D%22%235dc2af%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22/%3E%3C/svg%3E');
 }
 
@@ -461,6 +558,7 @@ button {
 }
 
 .filters li a {
+    cursor: pointer;
 	color: inherit;
 	margin: 3px;
 	padding: 3px 7px;

@@ -2,6 +2,7 @@
 
 import type {TemplateHandler} from "./interfaces"
 import {getStorage, storageKeys} from "./storage"
+import {tagNameToProp} from "./utils";
 
 const propsStorage = getStorage(storageKeys.PROPS);
 const eventsStorage = getStorage(storageKeys.EVENTS);
@@ -88,13 +89,15 @@ const PropsHandler: TemplateHandler = {
                 const index = Number(match[1]);
                 const props = propsStorage.get(node) || {};
                 node.removeAttribute(
-                    attribute.nodeName
+                    attribute.nodeName,
                 );
+                const nodeName = attribute.nodeName;
+                const propName = tagNameToProp(nodeName);
                 propsStorage.set(
                     node,
                     {
                         ...props,
-                        [attribute.nodeName]: args[index]
+                        [propName]: args[index]
                     }
                 );
             }

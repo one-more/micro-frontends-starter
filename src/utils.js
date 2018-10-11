@@ -6,17 +6,32 @@ const propsStorage = getStorage(storageKeys.PROPS);
 const eventsStorage = getStorage(storageKeys.EVENTS);
 
 export function clearPropsStorage(): void {
-    for (const key of propsStorage.keys()) {
-        if (!document.contains(key)) {
-            propsStorage.delete(key)
+    setTimeout(() => {
+        for (const key of propsStorage.keys()) {
+            if (!key.isConnected) {
+                propsStorage.delete(key)
+            }
         }
-    }
+    })
 }
 
 export function clearEventsStorage(): void {
-    for (const key of eventsStorage.keys()) {
-        if (!document.contains(key)) {
-            eventsStorage.delete(key)
+    setTimeout(() => {
+        for (const key of eventsStorage.keys()) {
+            if (!key.isConnected) {
+                eventsStorage.delete(key)
+            }
         }
-    }
+    })
+}
+
+export function tagNameToProp(nodeName: string): string {
+    return nodeName.split("-").reduce(
+        (acc, next) => {
+            if (next) {
+                return acc + next[0].toUpperCase() + next.slice(1)
+            }
+            return acc
+        }
+    );
 }
