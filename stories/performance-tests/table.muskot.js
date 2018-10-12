@@ -1,4 +1,4 @@
-import {Component, registerComponent, html} from "../../dist/main";
+import { Component, registerComponent, html } from "../../src";
 
 const key = 'table';
 
@@ -32,18 +32,16 @@ export default class MuskotTable extends Component {
 
     render() {
         const {data} = this.state[key];
-        return html`
+        return `
             <table>
                 <tbody>
-                    <template map="${data}">
-                            ${row => html`
-                                <tr>
-                                    <template map="${row}">
-                                        ${col => `<td>${col}</td>`}
-                                    </template>    
-                                </tr>
-                            `}
-                    </template>
+                    ${data.map(row => `
+                        <tr style="font-size: 2px; width: 1px; height: 1px">
+                            ${row.map(
+                                col => `<td style="width: 1px; height: 1px">${col}</td>`
+                            ).join('')}
+                        </tr>
+                    `).join('')}
                 </tbody>
             </table>   
         `

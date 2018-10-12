@@ -20,8 +20,8 @@ export default class ReactTable extends Component {
         return (
             <table>
                 <tbody>
-                    {this.props.rows.map((row, i) => <tr key={i}>
-                        {row.map((col, j) => <td key={j}>{col}</td>)}
+                    {this.props.rows.map((row, i) => <tr key={i} style={{fontSize: '2px', width: '1px', height: '1px'}}>
+                        {row.map((col, j) => <td key={j} style={{width: '1px', height: '1px'}}>{col}</td>)}
                     </tr>)}
                 </tbody>
             </table>

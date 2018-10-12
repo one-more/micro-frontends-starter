@@ -23,7 +23,9 @@ const stubImplementation: Store = {
             }
         }
     },
-    getState(key: string) {},
+    getState(key: string) {
+        return this.reducers[key]
+    },
     migrate(newStore: Store) {
         for (const key in this.reducers) {
             const reducer = this.reducers[key];

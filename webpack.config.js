@@ -11,6 +11,7 @@ module.exports = {
         library: "muskot",
         libraryTarget: "commonjs2"
     },
+    devtool: 'inline-source-map',
     module: {
         rules: [
             {

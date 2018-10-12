@@ -1,6 +1,6 @@
 import React, {Component} from "react"
 import styled from "styled-components"
-import {registerReducer, getState} from "../../dist/main"
+import {registerReducer, getState} from "../../src"
 import ReactTable from "./table.react"
 import "./table.muskot"
 
@@ -21,9 +21,7 @@ const FramePart = styled.div`
 const key = 'table';
 
 const reducer = {
-    state: {
-        data: (new Array(100).fill().map(() => new Array(100).fill().map((el,i) => i)))
-    }
+    data: (new Array(100).fill().map(() => new Array(50).fill().map((el,i) => i)))
 };
 
 registerReducer(key, reducer);
