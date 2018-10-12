@@ -46,6 +46,13 @@ export default class Table extends Component {
         })
     };
 
+    removeAll = () => {
+        this.setState({
+            renderMuskot: false,
+            renderReact: false,
+        })
+    };
+
     render() {
         const {data} = getState(key);
         return (
@@ -53,7 +60,7 @@ export default class Table extends Component {
                 <Frame>
                     <button onClick={this.renderReact}>render react</button>
                     <button onClick={this.renderMuskot}>render muskot</button>
-                    <button>remove all</button>
+                    <button onClick={this.removeAll}>remove all</button>
                 </Frame>
                 <Frame>
                     <FramePart>
