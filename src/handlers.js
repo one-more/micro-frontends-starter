@@ -140,13 +140,13 @@ let handlers: Array<Function> = [
 export function callHandlers(element: DocumentFragment | Node, args: any[]): void {
     handlers.forEach(handler => {
         handler(element, args);
-        for (let i = 0; i < element.childNodes.length; i++) {
-            callHandlers(
-                element.childNodes[i],
-                args
-            )
-        }
-    })
+    });
+    for (let i = 0; i < element.childNodes.length; i++) {
+        callHandlers(
+            element.childNodes[i],
+            args
+        )
+    }
 }
 
 export function addTemplateHandler(key:string, handler: TemplateHandler): void {
