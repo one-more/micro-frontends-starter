@@ -3,6 +3,7 @@
 import type {TemplateHandler} from "./interfaces"
 import {getStorage, storageKeys} from "./storage"
 import {tagNameToProp} from "./utils";
+import {isCustomComponent} from "./web-components";
 
 const propsStorage = getStorage(storageKeys.PROPS);
 const eventsStorage = getStorage(storageKeys.EVENTS);
@@ -79,27 +80,44 @@ const MapHandler: TemplateHandler = {
     }
 };
 
+function shouldSetPropToStorage(value: any, node: Node): boolean {
+    return typeof value === "function" || typeof value === "object" || isCustomComponent(node)
+}
+
+function parseAttribute(attribute: Node, node: Node, args: any[]) {
+    const match = attribute.nodeValue.match(/__ARG__(\d+)/);
+    if (match && match[1]) {
+        const index = Number(match[1]);
+        const nodeName = attribute.nodeName;
+        const propName = tagNameToProp(nodeName);
+        const value = args[index];
+        return [propName, value]
+    }
+    return [attribute.nodeName, attribute.nodeValue]
+}
+
 const PropsHandler: TemplateHandler = {
     call: (node: any, args: any[]) => {
         const attributes = node.attributes || [];
         for (let i = 0; i < attributes.length; i++) {
             const attribute = attributes[i];
-            const match = attribute.nodeValue.match(/__ARG__(\d+)/);
-            if (match && match[1]) {
-                const index = Number(match[1]);
+            const [propName, value] = parseAttribute(
+                attribute,
+                node,
+                args
+            );
+            if (shouldSetPropToStorage(value, node)) {
                 const props = propsStorage.get(node) || {};
                 node.removeAttribute(
                     attribute.nodeName,
                 );
-                const nodeName = attribute.nodeName;
-                const propName = tagNameToProp(nodeName);
                 propsStorage.set(
                     node,
                     {
                         ...props,
-                        [propName]: args[index]
+                        [propName]: value
                     }
-                );
+                )
             }
         }
     }

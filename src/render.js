@@ -5,33 +5,16 @@ import {getStorage, storageKeys} from "./storage"
 import shallowEqual from "./shallow-equal";
 
 const propsStorage = getStorage(storageKeys.PROPS);
-const eventsStorage = getStorage(storageKeys.EVENTS);
-
-function eventsEqual(elementNode: Node, fragmentNode: Node) {
-    const elementEvents = eventsStorage.get(elementNode);
-    const fragmentEvents = eventsStorage.get(fragmentNode);
-    if (elementEvents && fragmentEvents) {
-        const elementKeys = Object.keys(elementEvents);
-        const fragmentKeys = Object.keys(fragmentEvents);
-        if (elementKeys.length !== fragmentKeys.length) {
-            return false
-        }
-        for (const key of elementKeys) {
-            if (elementEvents[key] !== fragmentEvents[key]) {
-                return false
-            }
-        }
-        return true
-    }
-    if (elementEvents || fragmentEvents) {
-        return false
-    }
-    return true
-}
 
 function nodeEquals(elementNode: Node, fragmentNode: Node): boolean {
     const elClone = elementNode.cloneNode(false);
     const frClone = fragmentNode.cloneNode(false);
+    if (propsStorage.get(fragmentNode)) {
+        return shallowEqual(
+            propsStorage.get(elementNode),
+            propsStorage.get(fragmentNode)
+        ) && elClone.isEqualNode(frClone)
+    }
     return elClone.isEqualNode(frClone)
 }
 
@@ -121,7 +104,9 @@ function updateAttributes(elementNode: Node, fragmentNode: Node): void {
             frProps
         );
         if (!shallowEqual(elProps, frProps)) {
-            render.call((elementNode: any))
+            if (isCustomComponent(elementNode)) {
+                render.call((elementNode: any))
+            }
         }
     }
 }
@@ -174,31 +159,46 @@ function nodeFilter(node: Node): boolean {
     return false
 }
 
+function handleChildrenCountChanged(elementNode: Node, fragmentNode: Node, elementNodes: Node[], fragmentNodes: Node[]): void {
+    const deleted = elementsDeleted(
+        elementNodes,
+        fragmentNodes,
+    );
+    if (fragmentNodes.length === 0) {
+        return (elementNode.parentNode: any).replaceChild(
+            fragmentNode,
+            elementNode,
+        );
+    }
+    if (deleted.length === 1) {
+        (deleted[0].parentNode: any).removeChild(deleted[0]);
+        return updateChildren(
+            elementNode,
+            fragmentNode
+        )
+    }
+    if (childrenChangedCount(elementNodes, fragmentNodes) > 0) {
+        return (elementNode.parentNode: any).replaceChild(
+            fragmentNode,
+            elementNode,
+        );
+    }
+    return appendChildren(
+        elementNode,
+        elementNodes,
+        fragmentNodes,
+    )
+}
+
 function updateChildren(elementNode: Node, fragmentNode: Node): void {
     const elementNodes = Array.from(elementNode.childNodes).filter(nodeFilter);
     const fragmentNodes = Array.from(fragmentNode.childNodes).filter(nodeFilter);
     if (elementNodes.length !== fragmentNodes.length) {
-        const deleted = elementsDeleted(
-            elementNodes,
-            fragmentNodes,
-        );
-        if (deleted.length === 1) {
-            (deleted[0].parentNode: any).removeChild(deleted[0]);
-            return updateChildren(
-                elementNode,
-                fragmentNode
-            )
-        }
-        if (childrenChangedCount(elementNodes, fragmentNodes) > 0) {
-            return (elementNode.parentNode: any).replaceChild(
-                fragmentNode,
-                elementNode,
-            );
-        }
-        return appendChildren(
+        return handleChildrenCountChanged(
             elementNode,
+            fragmentNode,
             elementNodes,
-            fragmentNodes,
+            fragmentNodes
         )
     }
     if (elementNodes.length === 0 && fragmentNodes.length === 0) {

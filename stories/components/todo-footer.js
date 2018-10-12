@@ -5,10 +5,6 @@ export default class TodoFooter extends Component {
         return 'todo-footer';
     }
 
-    static get observableProps() {
-        return ['filter', 'completed', 'active']
-    }
-
     get isShadow() {
         return false;
     }
