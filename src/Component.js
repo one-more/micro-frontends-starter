@@ -70,9 +70,13 @@ export default class Component extends HTMLElement {
 
     mounted = false;
 
+    beforeRender() {}
+
     render() {
         return ''
     }
+
+    afterRender() {}
 
     subscribeToStore() {
         for (const key of this.keys) {

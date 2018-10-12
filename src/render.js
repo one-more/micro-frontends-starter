@@ -224,6 +224,8 @@ function createFragmentFromStr(tpl: string): HTMLTemplateElement {
 }
 
 export function render() {
+    this.beforeRender();
+
     if (this.isShadow && !this.shadowRoot) {
         this.attachShadow({mode: 'open'});
     }
@@ -246,4 +248,6 @@ export function render() {
             fragment.content
         )
     }
+
+    this.afterRender()
 }

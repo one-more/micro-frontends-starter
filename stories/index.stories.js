@@ -8,6 +8,7 @@ import "./components/greeter"
 import "./components/counter"
 import "./components/todo-list"
 import "./components/button"
+import Table from "./performance-tests/table"
 
 changeStoreImplementation(store);
 
@@ -25,3 +26,6 @@ storiesOf('Button', module)
     .add('info', () => <x-button type="info">info btn</x-button>)
     .add('danger', () => <x-button type="danger">danger btn</x-button>)
     .add('success', () => <x-button type="success">success btn</x-button>)
+
+storiesOf('Performance tests', module)
+    .add('table', () => <Table />)
