@@ -224,30 +224,91 @@ function createFragmentFromStr(tpl: string): HTMLTemplateElement {
 }
 
 export function render() {
+    performance.mark('muskot start rendering');
     this.beforeRender();
 
     if (this.isShadow && !this.shadowRoot) {
+        performance.mark('muskot attaching root');
         this.attachShadow({mode: 'open'});
+        performance.mark('muskot root attached');
+        performance.measure(
+            "muskot attach root",
+            'muskot attaching root',
+            'muskot root attached'
+        );
     }
+    performance.mark('muskot create render DOM');
     const renderRes = this.render();
+    performance.mark('muskot render DOM created');
+    performance.measure(
+        "muskot component render result",
+        'muskot create render DOM',
+        'muskot render DOM created'
+    );
+
     const root = this.isShadow ? (this.shadowRoot: any) : this;
+    performance.mark('muskot create fragment');
     const fragment = typeof renderRes === "string" ? createFragmentFromStr(renderRes) : renderRes;
+    performance.mark('muskot fragment created');
+    performance.measure(
+        "muskot fragment creation",
+        'muskot create fragment',
+        'muskot fragment created'
+    );
+
     if (!this.mounted) {
+        performance.mark('muskot insert style into component');
         root.innerHTML = `<style>${this.styles}</style>`;
+        performance.mark('muskot style inserted');
+        performance.measure(
+            "muskot style creation & insert by innerHTML",
+            'muskot insert style into component',
+            'muskot style inserted'
+        );
+
+        performance.mark('muskot append child with content');
         root.appendChild(fragment.content);
+        performance.mark('muskot content appended');
+        performance.measure(
+            "muskot append content on initial render",
+            'muskot append child with content',
+            'muskot content appended'
+        );
+
         this.mounted = true;
     } else {
+        performance.mark('muskot insert styles before content on update');
         const style = document.createElement("style");
         style.innerHTML = this.styles;
         fragment.content.insertBefore(
             style,
             fragment.content.firstChild
         );
+        performance.mark('muskot styles inserted on update');
+        performance.measure(
+            "muskot add styles by insertBefore",
+            'muskot insert styles before content on update',
+            'muskot styles inserted on update'
+        );
+
+        performance.mark('muskot update children');
         updateChildren(
             root,
             fragment.content
-        )
+        );
+        performance.mark('muskot children updated');
+        performance.measure(
+            "muskot update component's children",
+            'muskot update children',
+            'muskot children updated'
+        );
     }
+    performance.mark('muskot finish rendering');
+    performance.measure(
+        "muskot full render",
+        'muskot start rendering',
+        'muskot finish rendering'
+    );
 
-    this.afterRender()
+    this.afterRender();
 }
