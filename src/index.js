@@ -36,4 +36,9 @@ export {
 
 export {bind} from "./bind"
 
+export {
+    matchTagArg,
+    replaceTagArg
+} from "./utils"
+
 export {default as Component} from "./Component"

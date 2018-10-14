@@ -2,7 +2,7 @@
 
 import type {TemplateHandler} from "./interfaces"
 import {getStorage, storageKeys} from "./storage"
-import {tagNameToProp} from "./utils";
+import {matchTagArg, replaceTagArg, tagNameToProp} from "./utils";
 import {isCustomComponent} from "./web-components";
 
 const propsStorage = getStorage(storageKeys.PROPS);
@@ -14,7 +14,7 @@ const EventsTagHandler: TemplateHandler = {
         for (let i = 0; i < attributes.length; i++) {
             const attribute = attributes[i];
             if (attribute.nodeName.startsWith("on")) {
-                const match = attribute.nodeValue.match(/__ARG__(\d+)/);
+                const match = matchTagArg(attribute.nodeValue);
                 if (match && match[1]) {
                     const index = Number(match[1]);
                     const listener = args[index];
@@ -47,31 +47,34 @@ const MapHandler: TemplateHandler = {
     call: (node: Node, args: any[]) => {
         if (node instanceof HTMLTemplateElement) {
             if (node.hasAttribute("map")) {
-                const match = String(node.getAttribute("map")).match(/__ARG__(\d+)/);
+                const match = matchTagArg(String(node.getAttribute("map")));
                 if (match && match[1]) {
                     const index = Number(match[1]);
                     const arr = args[index];
                     const tpl = node.innerHTML;
-                    const fragment = document.createDocumentFragment();
-                    arr.forEach(el => {
-                        return tpl.replace(/__ARG__(\d+)/g, (match, index) => {
+                    const fragment = document.createElement("template");
+                    const nodes = arr.map(el => {
+                        return replaceTagArg(tpl, (match, index) => {
                             const arg = args[index];
                             if (typeof arg === "function") {
                                 const tplCall = arg(el);
                                 if (tplCall instanceof HTMLTemplateElement) {
-                                    fragment.appendChild(tplCall.content)
+                                    return tplCall.innerHTML
                                 } else {
-                                    const tmpTpl = document.createElement("template");
-                                    tmpTpl.innerHTML = tplCall;
-                                    fragment.appendChild(tmpTpl.content)
+                                    if (Array.isArray(tplCall)) {
+                                        return tplCall.join('');
+                                    } else {
+                                        return tplCall;
+                                    }
                                 }
                             }
                             return arg
                         })
                     });
+                    fragment.innerHTML = nodes.join('');
                     // $FlowFixMe
                     node.parentNode.replaceChild(
-                        fragment,
+                        fragment.content,
                         node
                     )
                 }
@@ -85,7 +88,7 @@ function shouldSetPropToStorage(value: any, node: Node): boolean {
 }
 
 function parseAttribute(attribute: Node, node: Node, args: any[]) {
-    const match = attribute.nodeValue.match(/__ARG__(\d+)/);
+    const match = matchTagArg(attribute.nodeValue);
     if (match && match[1]) {
         const index = Number(match[1]);
         const nodeName = attribute.nodeName;

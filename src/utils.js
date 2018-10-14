@@ -35,3 +35,19 @@ export function tagNameToProp(nodeName: string): string {
         }
     );
 }
+
+export function createTagArg(index: number): string {
+    return `<!--__ARG__${index}-->`
+}
+
+export function matchTagArg(str: string) {
+    return str.match(/__ARG__(\d+)/)
+}
+
+export function replaceTagArg(str: string, fn: Function) {
+    return str.replace(/<!--__ARG__(\d+)-->/, fn)
+}
+
+export function attributeStarts(str: string): boolean {
+    return str.trim().slice(-2) === `="`
+}

@@ -19,6 +19,11 @@ export default class ReactTable extends Component {
     render() {
         return (
             <table>
+                <thead>
+                    <tr>
+                        {this.props.rows[0].map(i => <th key={i}>#</th>)}
+                    </tr>
+                </thead>
                 <tbody>
                     {this.props.rows.map((row, i) => <tr key={i}>
                         {row.map((col, j) => <td key={j}>{col}</td>)}

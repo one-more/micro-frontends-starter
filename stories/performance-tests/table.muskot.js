@@ -34,15 +34,16 @@ export default class MuskotTable extends Component {
         const {data} = this.state[key];
         return html`
             <table>
+                <thead>
+                    <tr>
+                        ${data[0].map(() => `<th>#</th>`)}
+                    </tr>
+                </thead>
                 <tbody>
                     <template map="${data}">
-                            ${row => html`
-                                <tr>
-                                    <template map="${row}">
-                                        ${col => `<td>${col}</td>`}
-                                    </template>    
-                                </tr>
-                            `}
+                        <tr>
+                            ${row => row.map(col => `<td>${col}</td>`)}
+                        </tr>
                     </template>
                 </tbody>
             </table>   
