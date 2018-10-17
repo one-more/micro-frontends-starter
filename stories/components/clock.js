@@ -1,4 +1,6 @@
-import {Component, registerComponent, registerReducer} from "../../dist/main";
+import {Component, define, connect, registerReducer} from "../../dist/main";
+import React from "react"
+import {reactRenderer} from "../renderers";
 
 const dateStr = () => `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`;
 
@@ -17,19 +19,14 @@ const reducer = {
 
 const KEY = "clock";
 
+@define(`x-${KEY}`)
+@connect(KEY)
+@reactRenderer
 export default class Clock extends Component {
-    static get name() {
-        return `x-${KEY}`;
-    }
-
-    get keys() {
-        return [KEY]
-    }
-
     connected() {
-        this.state.clock.update();
+        this.state.update();
         this.interval = setInterval(
-            this.state.clock.update,
+            this.state.update,
             1000,
         );
     }
@@ -39,12 +36,12 @@ export default class Clock extends Component {
     }
 
     render() {
-        return `
-            <div>${this.state.clock.time}</div>
-        `
+        return (
+            <div>
+                {this.state.time}
+            </div>
+        )
     }
 }
 
 registerReducer(KEY, reducer);
-
-registerComponent(Clock.name, Clock);

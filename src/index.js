@@ -16,14 +16,6 @@ export {
 } from "./store"
 
 export {
-    addTemplateHandler,
-    setCoreHandler,
-    unloadHandler,
-    accessHandler,
-} from "./handlers"
-
-export {
-    html,
     css
 } from "./tag"
 
@@ -41,4 +33,9 @@ export {
     replaceTagArg
 } from "./utils"
 
-export {default as Component} from "./Component"
+export {
+    default as Component,
+    connect,
+    define,
+    props,
+} from "./Component"

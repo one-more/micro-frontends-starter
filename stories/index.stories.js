@@ -9,14 +9,15 @@ import "./components/counter"
 import "./components/todo-list"
 import "./components/button"
 import Table from "./performance-tests/table"
+import {props} from "../dist/main";
 
 changeStoreImplementation(store);
 
 storiesOf('Component', module)
-    .add('hello world', () => <hello-world></hello-world>)
-    .add('clock', () => <x-clock></x-clock>)
-    .add('without shadow dom', () => <x-greeter name="greeter!"></x-greeter>)
-    .add('counter', () => <x-counter start="5"></x-counter>)
+    .add('hello world', () => <hello-world />)
+    .add('clock', () => <x-clock />)
+    .add('without shadow dom', () => <x-greeter {...props({name: "greeter!"})} />)
+    .add('counter', () => <x-counter {...props({start: 5})} />)
     .add('todo list', () => <todo-list></todo-list>)
 
 storiesOf('Button', module)

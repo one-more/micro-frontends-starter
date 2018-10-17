@@ -1,30 +1,5 @@
 // @flow
 
-import {getStorage, storageKeys} from "./storage";
-
-const propsStorage = getStorage(storageKeys.PROPS);
-const eventsStorage = getStorage(storageKeys.EVENTS);
-
-export function clearPropsStorage(): void {
-    setTimeout(() => {
-        for (const key of propsStorage.keys()) {
-            if (!key.isConnected) {
-                propsStorage.delete(key)
-            }
-        }
-    })
-}
-
-export function clearEventsStorage(): void {
-    setTimeout(() => {
-        for (const key of eventsStorage.keys()) {
-            if (!key.isConnected) {
-                eventsStorage.delete(key)
-            }
-        }
-    })
-}
-
 export function tagNameToProp(nodeName: string): string {
     return nodeName.split("-").reduce(
         (acc, next) => {
@@ -36,16 +11,30 @@ export function tagNameToProp(nodeName: string): string {
     );
 }
 
-export function createTagArg(index: number): string {
+export function propNameToTag(prop: string): string {
+    let res = "";
+    for (let i = 0; i < prop.length; i++) {
+        if (prop[i] === prop[i].toUpperCase()) {
+            res += "-"+prop[i].toLowerCase()
+        } else {
+            res += prop[i]
+        }
+    }
+    return res
+}
+
+export function createTagArg(index: number, startAttribute: boolean): string {
+    if (startAttribute)
+        return `__ARG__${index}`;
     return `<!--__ARG__${index}-->`
 }
 
 export function matchTagArg(str: string) {
-    return str.match(/__ARG__(\d+)/)
+    return str.match(/(?:<!--)?__ARG__(\d+)(?:-->)?/)
 }
 
 export function replaceTagArg(str: string, fn: Function) {
-    return str.replace(/<!--__ARG__(\d+)-->/, fn)
+    return str.replace(/(?:<!--)?__ARG__(\d+)(?:-->)?/g, fn)
 }
 
 export function attributeStarts(str: string): boolean {

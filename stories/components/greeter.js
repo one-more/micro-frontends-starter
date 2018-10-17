@@ -1,10 +1,9 @@
-import {Component, registerComponent} from "../../dist/main";
+import {Component, define} from "../../dist/main";
+import {hyperRenderer} from "../renderers";
 
+@define('x-greeter')
+@hyperRenderer
 export default class Greeter extends Component {
-    static get name() {
-        return 'x-greeter';
-    }
-
     get isShadow() {
         return false;
     }
@@ -15,10 +14,8 @@ export default class Greeter extends Component {
     };
 
     render() {
-        return `
+        this.html`
             <div>${this.props.greet} ${this.props.name}</div>
         `
     }
 }
-
-registerComponent(Greeter.name, Greeter);

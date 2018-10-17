@@ -1,4 +1,5 @@
-import {Component, registerComponent, registerReducer, html} from "../../dist/main";
+import {Component, define, connect, registerReducer} from "../../dist/main";
+import {litRenderer} from "../renderers";
 
 const KEY = "counter";
 
@@ -16,42 +17,35 @@ const reducer = {
     }
 };
 
+@define(`x-${KEY}`)
+@connect(KEY)
+@litRenderer
 export default class Counter extends Component {
-    static get name() {
-        return `x-${KEY}`;
-    }
-
-    get keys() {
-        return [KEY]
-    }
-
     props = {
         start: 0
     };
 
     connected() {
-        this.state.counter.set(Number(this.props.start))
+        this.state.set(Number(this.props.start))
     }
 
     inc = () => {
-        this.state.counter.set(this.state.counter.current + 1)
+        this.state.set(this.state.current + 1)
     };
 
     dec = () => {
-        this.state.counter.set(this.state.counter.current - 1)
+        this.state.set(this.state.current - 1)
     };
 
     render() {
-        return html`
+        return this.html`
             <div style="display: flex" >
-                <button onClick="${this.inc}" > + </button>&nbsp;
-                <div>${this.state.counter.current}</div>&nbsp;
-                <button onClick="${this.dec}" > - </button>
+                <button @click="${this.inc}" > + </button>&nbsp;
+                <div>${this.state.current}</div>&nbsp;
+                <button @click="${this.dec}" > - </button>
             </div>
         `
     }
 }
 
 registerReducer(KEY, reducer);
-
-registerComponent(Counter.name, Counter);

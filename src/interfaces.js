@@ -8,7 +8,7 @@ export interface Component {
 }
 
 export interface TemplateHandler {
-    call(node: Node, args: any[]): void
+    call(node: Node, args: any[], ctx: Object): void
 }
 
 export interface WebComponents {

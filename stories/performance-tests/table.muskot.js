@@ -1,21 +1,15 @@
-import {Component, registerComponent, html} from "../../dist/main";
+import {Component, define, connect} from "../../dist/main";
 
 const key = 'table';
 
 let start;
 let end;
 
+@define('x-table')
+@connect(key)
 export default class MuskotTable extends Component {
-    static get name() {
-        return 'x-table';
-    }
-
     get isShadow() {
         return false;
-    }
-
-    get keys() {
-        return [key]
     }
 
     beforeRender() {
@@ -32,7 +26,7 @@ export default class MuskotTable extends Component {
 
     render() {
         const {data} = this.state[key];
-        return html`
+        return this.html`
             <table>
                 <thead>
                     <tr>
@@ -50,5 +44,3 @@ export default class MuskotTable extends Component {
         `
     }
 }
-
-registerComponent(MuskotTable.name, MuskotTable);

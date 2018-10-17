@@ -1,10 +1,10 @@
-import {Component, registerComponent, html} from "../../dist/main";
+import {Component, define} from "../../dist/main";
+import {reactRenderer} from "../renderers";
+import React from "react"
 
+@define('todo-footer')
+@reactRenderer
 export default class TodoFooter extends Component {
-    static get name() {
-        return 'todo-footer';
-    }
-
     get isShadow() {
         return false;
     }
@@ -17,44 +17,42 @@ export default class TodoFooter extends Component {
     }
 
     render() {
-        return html`
-            <footer class="footer" ${this.props.items.length === 0 ? 'hidden' : ''} >
-                <span class="todo-count">
-                    <strong>${this.props.active.length}</strong>
+        return (
+            <footer className="footer" hidden={this.props.items.length === 0} >
+                <span className="todo-count">
+                    <strong>{this.props.active.length}</strong>
                     <span> items left</span>
                 </span>
-                <ul class="filters">
+                <ul className="filters">
                     <li>
-                    <a 
-                        class="${this.getLinkClass(this.props.filters.ALL)}" 
-                        onClick="${this.props.filterAll}"
-                    >All</a>
+                        <a
+                            className={this.getLinkClass(this.props.filters.ALL)}
+                            onClick={this.props.filterAll}
+                        >All</a>
                     </li>
                     <span></span>
                     <li>
-                        <a 
-                            class="${this.getLinkClass(this.props.filters.ACTIVE)}"
-                            onClick="${this.props.filterActive}"
+                        <a
+                            className={this.getLinkClass(this.props.filters.ACTIVE)}
+                            onClick={this.props.filterActive}
                         >Active</a>
                     </li>
                     <span></span>
                     <li>
-                        <a 
-                            class="${this.getLinkClass(this.props.filters.COMPLETED)}"
-                            onClick="${this.props.filterCompleted}"
+                        <a
+                            className={this.getLinkClass(this.props.filters.COMPLETED)}
+                            onClick={this.props.filterCompleted}
                         >Completed</a>
                     </li>
                 </ul>
-                <button 
-                    class="clear-completed"
-                    ${this.props.completed.length === 0 ? 'hidden' : '' }
-                    onClick="${this.props.clearCompleted}"
+                <button
+                    className="clear-completed"
+                    hidden={this.props.completed.length === 0}
+                    onClick={this.props.clearCompleted}
                 >
                     Clear Completed
                 </button>
             </footer>
-        `
+        )
     }
 }
-
-registerComponent(TodoFooter.name, TodoFooter);

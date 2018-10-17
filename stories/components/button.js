@@ -1,4 +1,4 @@
-import {Component, registerComponent, css} from "../../dist/main";
+import {Component, define} from "../../dist/main";
 
 const sizes = {
     s: "s",
@@ -52,18 +52,15 @@ const borderWidthByType = {
     [types.success]: "0",
 };
 
+@define('x-button')
 export default class Button extends Component {
-    static get name() {
-        return 'x-button';
-    }
-
     props = {
         size: sizes.s,
         type: types.default
     };
 
     get styles() {
-        return css`
+        return this.css`
             button {
                 height: ${() => heightBySize[this.props.size]};
                 padding: ${() => paddingBySize[this.props.size]};
@@ -84,5 +81,3 @@ export default class Button extends Component {
         `
     }
 }
-
-registerComponent(Button.name, Button);

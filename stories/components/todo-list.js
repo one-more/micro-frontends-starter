@@ -1,17 +1,24 @@
 import {
-    Component, registerComponent,
-    registerReducer, html, bind
+    Component, registerReducer,
+    define, connect, bind
 } from "../../dist/main";
 import "./todo-item"
 import "./todo-footer"
+import {vueRenderer} from "../renderers";
 
 const KEY = 'todo-list';
 
 function fromStorage(defaultState) {
     try {
-        return JSON.parse(
+        const state = JSON.parse(
             localStorage.getItem(KEY)
-        ) || defaultState
+        ) || defaultState;
+        for (let key in defaultState) {
+            if (!state.hasOwnProperty(key)) {
+                state[key] = defaultState[key]
+            }
+        }
+        return state
     } catch(e) {
         return defaultState
     }
@@ -66,7 +73,8 @@ const reducer = {
             allChecked: false,
             filter: filters.ALL,
             active: [],
-            completed: []
+            completed: [],
+            filters,
         }
     ),
     actions: {
@@ -179,28 +187,27 @@ const reducer = {
     }
 };
 
+@define(KEY)
+@connect(KEY)
+@vueRenderer
 export default class TodoList extends Component {
-    static get name() {
-        return KEY;
-    }
-
-    get keys(): string[] {
-        return [KEY]
-    }
-
     get styles(): string {
         return styles
     }
 
     onKeyPressed = (event: KeyboardEvent) => {
         if (event.keyCode === 13) {
-            this.state[KEY].add(event.target.value);
+            this.state.add(event.target.value);
             event.target.value = "";
         }
     };
 
+    toggleAll = () => {
+        this.state.toggleAll()
+    };
+
     render() {
-        return html`
+        return `
             <section class="todoapp">
                 <header class="header">
                     <h1>todos</h1>
@@ -208,7 +215,7 @@ export default class TodoList extends Component {
                         placeholder="What needs to be done?" 
                         type="text" 
                         class="new-todo"
-                        onkeypress="${this.onKeyPressed}"
+                        @keypress="onKeyPressed"
                     >
                 </header>
                 <section class="main">
@@ -216,35 +223,20 @@ export default class TodoList extends Component {
                         class="toggle-all" 
                         type="checkbox" 
                         id="toggle-all"
-                        onChange="${this.state[KEY].toggleAll}"
-                        ${this.state[KEY].allChecked ? 'checked' : ''}
+                        @change="state.toggleAll"
+                        v-bind:checked="state.allChecked"
                     >
                     <label for="toggle-all"></label>
                     <ul class="todo-list">
-                        <template map="${this.state[KEY].filtered}" >
-                            ${item => html`
-                                <todo-item
-                                    done="${item.done}"
-                                    toggle="${bind(this.state[KEY].toggle, item.id)}"
-                                    destroy="${bind(this.state[KEY].remove, item.id)}"
-                                    id="${item.id}"
-                                    text="${item.text}"
-                                >
-                                </todo-item>    
-                            `}
-                        </template>
+                        <todo-item
+                            v-for="item in state.filtered"
+                            v-bind="props({...item, ...state})"
+                        >
+                        </todo-item>
                     </ul>
                 </section>
                 <todo-footer
-                    active="${this.state[KEY].active}"
-                    completed="${this.state[KEY].completed}"
-                    items="${this.state[KEY].items}"
-                    filters="${filters}"
-                    filter="${this.state[KEY].filter}"
-                    filter-All="${this.state[KEY].filterAll}"
-                    filter-Active="${this.state[KEY].filterActive}"
-                    filter-Completed="${this.state[KEY].filterCompleted}"
-                    clear-Completed="${this.state[KEY].clearCompleted}"
+                    v-bind="props(state)"
                 ></todo-footer>
             </section>
         `
@@ -252,7 +244,6 @@ export default class TodoList extends Component {
 }
 
 registerReducer(KEY, reducer);
-registerComponent(TodoList.name, TodoList);
 
 const styles = `
 html,

@@ -56,12 +56,10 @@ export default class Table extends Component {
 
     renderHyper = () => {
         const {data} = getState(key);
-        console.log('start rendering hyper', this.hyperRef.current);
+        console.log('start rendering hyper');
         const start = performance.now();
         this.hyperRender`${new HyperTable(data)}`;
-        console.log(`
-            rendered by ${performance.now() - start}ms
-        `)
+        console.log(`rendered by ${performance.now() - start}ms`)
     };
 
     removeAll = () => {

@@ -1,10 +1,9 @@
-import {Component, registerComponent, html} from "../../dist/main";
+import {Component, define} from "../../dist/main";
+import {litRenderer} from "../renderers";
 
+@define('todo-item')
+@litRenderer
 export default class TodoItem extends Component {
-    static get name() {
-        return 'todo-item';
-    }
-
     get isShadow(): boolean {
         return false
     }
@@ -14,19 +13,19 @@ export default class TodoItem extends Component {
     }
 
     render() {
-        return html`
+        return this.html`
             <li class="${this.done  ? 'completed' : ''}">
                 <div class="view">
                     <input 
                         type="checkbox"
                         class="toggle"
-                        onchange="${this.props.toggle}"
+                        @change="${() => this.props.toggle(this.props.id)}"
                         ${this.done ? 'checked' : ''}
                     >
                     <label>${this.props.text}</label>
                     <button 
-                        class="destroy"
-                        onclick="${this.props.destroy}"
+                        class="destroy" 
+                        @click="${() => this.props.remove(this.props.id)}" 
                     >
                     </button>
                 </div>
@@ -34,5 +33,3 @@ export default class TodoItem extends Component {
         `
     }
 }
-
-registerComponent(TodoItem.name, TodoItem);

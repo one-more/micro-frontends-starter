@@ -1,9 +1,7 @@
-import {Component, registerComponent} from "../../dist/main";
+import {Component, define} from "../../dist/main";
 
+@define('hello-world')
 export default class HelloWorld extends Component {
-    static get name() {
-        return 'hello-world';
-    }
 
     render() {
         return `
@@ -11,5 +9,3 @@ export default class HelloWorld extends Component {
         `
     }
 }
-
-registerComponent(HelloWorld.name, HelloWorld);
