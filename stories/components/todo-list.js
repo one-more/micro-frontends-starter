@@ -387,7 +387,7 @@ button {
 	padding: 10px 27px 10px 27px;
 }
 
-.toggle-all[checked] + label:before {
+.toggle-all:checked + label:before {
 	color: #737373;
 }
 

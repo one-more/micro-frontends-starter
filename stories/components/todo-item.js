@@ -9,8 +9,20 @@ export default class TodoItem extends Component {
     }
 
     get done(): boolean {
-        return this.props.done === "true"
+        return this.props.done
     }
+
+    toggle = () => {
+        this.props.toggle(
+            this.props.id
+        )
+    };
+
+    remove = () => {
+        this.props.remove(
+            this.props.id
+        )
+    };
 
     render() {
         return this.html`
@@ -19,13 +31,13 @@ export default class TodoItem extends Component {
                     <input 
                         type="checkbox"
                         class="toggle"
-                        @change="${() => this.props.toggle(this.props.id)}"
-                        ${this.done ? 'checked' : ''}
+                        @change="${this.toggle}"
+                        ?checked="${this.done}"
                     >
                     <label>${this.props.text}</label>
-                    <button 
+                    <button
                         class="destroy" 
-                        @click="${() => this.props.remove(this.props.id)}" 
+                        @click="${this.remove}"
                     >
                     </button>
                 </div>

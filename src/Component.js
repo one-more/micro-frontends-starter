@@ -48,7 +48,7 @@ export default class Component extends HTMLElement {
     }
 
     static get observedAttributes(): string[] {
-        return this.observableProps.map(propNameToTag)
+        return this.observableProps.map(propNameToTag).concat("props-id")
     }
 
     static get observableProps() {

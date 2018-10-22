@@ -22,6 +22,7 @@ export function hyperRenderer(Wrapped: Class<Component>) {
         get html() {
             return hyper(this.root)
         }
+        insertContent() {}
     }
 }
 
@@ -45,19 +46,18 @@ export function litRenderer(Wrapped: Class<Component>) {
 export function vueRenderer(Wrapped: Class<Component>) {
     return class extends Wrapped {
         insertContent(root: HTMLElement, content: any) {
-            const proxy = new Proxy(this, {
-                get: (obj, prop) => {
-                    return obj[prop]
-                }
-            });
-            new Vue({
-                el: root,
-                template: content,
-                data: {...this},
-                methods: {
-                    props
-                }
-            })
+            if (!this.mounted) {
+                this.vue = new Vue({
+                    el: root,
+                    template: content,
+                    data: {...this},
+                    methods: {
+                        props
+                    }
+                })
+            } else {
+                this.vue.state = this.state;
+            }
         }
     }
 }
