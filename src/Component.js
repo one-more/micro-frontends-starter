@@ -5,6 +5,7 @@ import {subscribe, getState} from "./store"
 import {render} from "./render"
 import {getStorage, storageKeys} from "./storage"
 import {propNameToTag, tagNameToProp} from "./utils";
+import {html, css} from "./tag"
 
 const propsStorage = getStorage(storageKeys.PROPS);
 
@@ -62,6 +63,12 @@ export default class Component extends HTMLElement {
     state = {};
 
     mounted = false;
+
+    get html() {
+        return html
+    }
+
+    css = css;
 
     root: HTMLElement;
 

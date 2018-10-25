@@ -1,19 +1,18 @@
 import {Component, define, connect} from "../../dist/main";
-import {reactRenderer} from "../renderers";
-import React from "react"
+import {vueRenderer} from "../renderers";
 
 let start;
 let end;
 
-@define('react-table')
-@reactRenderer
+@define('vue-table')
+@vueRenderer
 export default class MuskotTable extends Component {
     get isShadow() {
         return false;
     }
 
     beforeRender() {
-        console.log('start render react');
+        console.log('start render vue');
         start = performance.now();
     }
 
@@ -25,18 +24,21 @@ export default class MuskotTable extends Component {
     }
 
     render() {
-        const {data} = this.props;
-        return (
+        return `
             <table>
                 <thead>
                     <tr>
-                        {data[0].map(i => <th key={i}>#</th>)}
+                        <th v-for="item in attributes.data[0]" >#</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((row, i) => <tr key={i}>{row.map((col, j) => <td key={j}>{col}</td>)}</tr>)}
+                    <tr v-for="row in attributes.data" >
+                        <td v-for="col in row" >
+                            {{ col }}
+                        </td>
+                    </tr>
                 </tbody>
-            </table>
-        )
+            </table>   
+        `
     }
 }

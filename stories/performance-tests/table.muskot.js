@@ -1,12 +1,9 @@
 import {Component, define, connect} from "../../dist/main";
 
-const key = 'table';
-
 let start;
 let end;
 
-@define('x-table')
-@connect(key)
+@define('muskot-table')
 export default class MuskotTable extends Component {
     get isShadow() {
         return false;
@@ -25,7 +22,7 @@ export default class MuskotTable extends Component {
     }
 
     render() {
-        const {data} = this.state[key];
+        const {data} = this.props;
         return this.html`
             <table>
                 <thead>
@@ -34,11 +31,7 @@ export default class MuskotTable extends Component {
                     </tr>
                 </thead>
                 <tbody>
-                    <template map="${data}">
-                        <tr>
-                            ${row => row.map(col => `<td>${col}</td>`)}
-                        </tr>
-                    </template>
+                    ${data.map(row => this.html`<tr>${row.map(col => `<td>${col}</td>`)}</tr>`)}
                 </tbody>
             </table>   
         `

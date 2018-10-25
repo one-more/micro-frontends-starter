@@ -1,37 +1,39 @@
-import {Component} from "hyperhtml"
+import {Component, define, connect} from "../../dist/main";
+import {hyperRenderer} from "../renderers";
 
-class TableRow extends Component {
-    constructor(row) {
-        super();
+let start;
+let end;
 
-        this.row = row
+@define('hyper-table')
+@hyperRenderer
+export default class MuskotTable extends Component {
+    get isShadow() {
+        return false;
+    }
+
+    beforeRender() {
+        console.log('start render hyper');
+        start = performance.now();
+    }
+
+    afterRender() {
+        end = performance.now();
+        console.log(
+            `rendered by ${end - start}ms`
+        );
     }
 
     render() {
-        return this.html`
-            <tr>  
-                ${this.row.map(col => `<td>${col}</td>`)}
-            </tr>
-        `
-    }
-}
-
-export default class Table extends Component {
-    constructor(data) {
-        super();
-        this.items = data
-    }
-
-    render() {
+        const {data} = this.props;
         return this.html`
             <table>
                 <thead>
                     <tr>
-                        ${this.items[0].map(() => `<th>#</th>`)}
-                        </tr>
+                        ${data[0].map(() => `<th>#</th>`)}
+                    </tr>
                 </thead>
                 <tbody>
-                    ${this.items.map(item => TableRow.for(item))}
+                    ${data.map(row => `<tr>${row.map(col => `<td>${col}</td>`).join("")}</tr>`)}
                 </tbody>
             </table>   
         `

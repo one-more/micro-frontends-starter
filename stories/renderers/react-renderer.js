@@ -1,10 +1,5 @@
-// @flow
-
-import {Component, props, addStorage, getStorage} from "../dist/main";
-import {render} from "react-dom"
-import {hyper} from "hyperhtml"
-import {html, render as renderLit} from "lit-html"
-import Vue from "vue/dist/vue.esm.js"
+import {render} from "react-dom";
+import {Component, addStorage, getStorage} from "../../dist/main";
 
 const PROXY_LISTENERS = "PROXY_LISTENERS";
 
@@ -70,51 +65,6 @@ export function reactRenderer(Wrapped: Class<Component>) {
                 content,
                 root
             )
-        }
-    }
-}
-
-export function hyperRenderer(Wrapped: Class<Component>) {
-    return class extends Wrapped {
-        get html() {
-            return hyper(this.root)
-        }
-        insertContent() {}
-    }
-}
-
-export function litRenderer(Wrapped: Class<Component>) {
-    return class extends Wrapped {
-        constructor() {
-            super();
-
-            this.html = html;
-        }
-
-        insertContent(root: HTMLElement, content: any) {
-            renderLit(
-                content,
-                root
-            )
-        }
-    }
-}
-
-export function vueRenderer(Wrapped: Class<Component>) {
-    return class extends Wrapped {
-        insertContent(root: HTMLElement, content: any) {
-            if (!this.mounted) {
-                this.vue = new Vue({
-                    el: root,
-                    template: content,
-                    data: {...this},
-                    methods: {
-                        props
-                    }
-                })
-            } else {
-                this.vue.state = this.state;
-            }
         }
     }
 }

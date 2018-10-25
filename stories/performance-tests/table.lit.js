@@ -1,19 +1,18 @@
 import {Component, define, connect} from "../../dist/main";
-import {reactRenderer} from "../renderers";
-import React from "react"
+import {litRenderer} from "../renderers";
 
 let start;
 let end;
 
-@define('react-table')
-@reactRenderer
+@define('lit-table')
+@litRenderer
 export default class MuskotTable extends Component {
     get isShadow() {
         return false;
     }
 
     beforeRender() {
-        console.log('start render react');
+        console.log('start render lit');
         start = performance.now();
     }
 
@@ -26,17 +25,17 @@ export default class MuskotTable extends Component {
 
     render() {
         const {data} = this.props;
-        return (
+        return this.html`
             <table>
                 <thead>
                     <tr>
-                        {data[0].map(i => <th key={i}>#</th>)}
+                        ${data[0].map(() => this.html`<th>#</th>`)}
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((row, i) => <tr key={i}>{row.map((col, j) => <td key={j}>{col}</td>)}</tr>)}
+                    ${data.map(row => this.html`<tr>${row.map(col => this.html`<td>${col}</td>`)}</tr>`)}
                 </tbody>
-            </table>
-        )
+            </table>   
+        `
     }
 }

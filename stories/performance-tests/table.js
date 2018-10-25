@@ -1,10 +1,11 @@
 import React, {Component} from "react"
 import styled from "styled-components"
-import {registerReducer, getState} from "../../dist/main"
-import ReactTable from "./table.react"
+import {registerReducer, getState, props} from "../../dist/main"
+import "./table.react"
 import "./table.muskot"
-import HyperTable from "./table.hyperhtml"
-import {hyper} from "hyperhtml"
+import "./table.hyperhtml"
+import "./table.lit"
+import "./table.vue"
 
 const Frame = styled.div`
     display: flex;
@@ -34,9 +35,10 @@ export default class Table extends Component {
     state = {
         renderReact: false,
         renderMuskot: false,
+        renderHyper: false,
+        renderLit: false,
+        renderVue: false,
     };
-
-    hyperRef = React.createRef();
 
     renderReact = () => {
         this.setState({
@@ -50,23 +52,31 @@ export default class Table extends Component {
         })
     };
 
-    get hyperRender() {
-        return hyper(this.hyperRef.current)
-    }
-
     renderHyper = () => {
-        const {data} = getState(key);
-        console.log('start rendering hyper');
-        const start = performance.now();
-        this.hyperRender`${new HyperTable(data)}`;
-        console.log(`rendered by ${performance.now() - start}ms`)
+        this.setState({
+            renderHyper: true
+        })
+    };
+
+    renderLit = () => {
+        this.setState({
+            renderLit: true
+        })
+    };
+
+    renderVue = () => {
+        this.setState({
+            renderVue: true
+        })
     };
 
     removeAll = () => {
-        this.hyperRender``;
         this.setState({
             renderMuskot: false,
             renderReact: false,
+            renderHyper: false,
+            renderLit: false,
+            renderVue: false,
         })
     };
 
@@ -78,18 +88,30 @@ export default class Table extends Component {
                     <button onClick={this.renderReact}>render react</button>
                     <button onClick={this.renderMuskot}>render muskot</button>
                     <button onClick={this.renderHyper}>render hyper html</button>
+                    <button onClick={this.renderLit}>render lit</button>
+                    <button onClick={this.renderVue}>render vue</button>
                     <button onClick={this.removeAll}>remove all</button>
                 </Frame>
                 <Frame>
                     <FramePart>
-                        {this.state.renderReact && <ReactTable rows={data} />}
+                        {this.state.renderReact && <react-table {...props({data})} />}
                     </FramePart>
                     <FramePart>
-                        {this.state.renderMuskot && <x-table></x-table>}
+                        {this.state.renderMuskot && <muskot-table {...props({data})} />}
                     </FramePart>
                 </Frame>
                 <Frame>
-                    <FramePart innerRef={this.hyperRef} />
+                    <FramePart>
+                        {this.state.renderHyper && <hyper-table {...props({data})} />}
+                    </FramePart>
+                    <FramePart>
+                        {this.state.renderLit && <lit-table {...props({data})} />}
+                    </FramePart>
+                </Frame>
+                <Frame>
+                    <FramePart>
+                        {this.state.renderVue && <vue-table {...props({data})} />}
+                    </FramePart>
                 </Frame>
             </React.Fragment>
         )

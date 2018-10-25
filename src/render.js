@@ -8,14 +8,14 @@ export function render() {
     }
 
     if (!this.root) {
+        this.root = document.createElement("div");
+        this.root.style.display = 'contents';
         if (this.isShadow) {
             this.shadowRoot.innerHTML = `<style>${this.styles}</style>`;
-            this.root = document.createElement("div");
             this.shadowRoot.appendChild(this.root);
-            this.root.style = 'display: contents'
         } else {
-            this.innerHTML = `<style>${this.styles}</style>`;
-            this.root = this
+            this.styles && (this.innerHTML = `<style>${this.styles}</style>`);
+            this.appendChild(this.root)
         }
     }
 
