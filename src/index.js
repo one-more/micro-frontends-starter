@@ -38,4 +38,4 @@ export {
     connect,
     define,
     props,
-} from "./Component"
+} from "./component"

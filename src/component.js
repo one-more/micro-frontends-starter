@@ -4,18 +4,13 @@ import registerComponent from "./web-components"
 import {subscribe, getState} from "./store"
 import {render} from "./render"
 import {getStorage, storageKeys} from "./storage"
-import {propNameToTag, tagNameToProp} from "./utils";
+import {compose, not, parseAttributes, propNameToTag} from "./utils";
 import {html, css} from "./tag"
+import shallowEqual from "./shallow-equals";
 
 const propsStorage = getStorage(storageKeys.PROPS);
 
-function parseAttributes(attributes: NamedNodeMap): Object {
-    const result = {};
-    for (const attribute of attributes) {
-        result[tagNameToProp(attribute.name)] = attribute.value;
-    }
-    return result;
-}
+const PROPS_ID = "props-id";
 
 export default class Component extends HTMLElement {
     get name() {
@@ -49,7 +44,7 @@ export default class Component extends HTMLElement {
     }
 
     static get observedAttributes(): string[] {
-        return this.observableProps.map(propNameToTag).concat("props-id")
+        return this.observableProps.map(propNameToTag).concat(PROPS_ID)
     }
 
     static get observableProps() {
@@ -129,18 +124,32 @@ export default class Component extends HTMLElement {
     adopted() {}
 
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string) {
-        if (this.mounted && oldValue != newValue) {
+        if (this.mounted && oldValue !== newValue) {
             this.propsChanged(
                 {
                     ...this.props,
                     [attributeName]: newValue,
                 }
             );
-            render.call(this)
+            if (attributeName === PROPS_ID) {
+                const oldProps = propsStorage.get(Number(oldValue));
+                const newProps = propsStorage.get(Number(newValue));
+                if (this.shouldComponentUpdate(oldProps, newProps)) {
+                    propsStorage.delete(oldValue);
+                    render.call(this)
+                }
+            } else {
+                render.call(this)
+            }
         }
     }
 
     propsChanged(newProps: Object) {}
+
+    shouldComponentUpdate = compose(
+        not,
+        shallowEqual,
+    );
 }
 
 export function connect(key: string) {
@@ -169,9 +178,9 @@ export function props(props: Object) {
         props
     );
     return {
-        'props-id': id,
         toString() {
-            return `props-id="${id}"`
-        }
+            return `${PROPS_ID}="${id}"`
+        },
+        [PROPS_ID]: id,
     }
 }

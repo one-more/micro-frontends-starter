@@ -23,20 +23,30 @@ export function propNameToTag(prop: string): string {
     return res
 }
 
-export function createTagArg(index: number, startAttribute: boolean): string {
-    if (startAttribute)
-        return `__ARG__${index}`;
-    return `<!--__ARG__${index}-->`
+export function parseAttributes(attributes: NamedNodeMap): Object {
+    const result = {};
+    for (const attribute of attributes) {
+        result[tagNameToProp(attribute.name)] = attribute.value;
+    }
+    return result;
 }
 
-export function matchTagArg(str: string) {
-    return str.match(/(?:<!--)?__ARG__(\d+)(?:-->)?/)
+export function curry(fn: Function) {
+    return (...args: any[]) => {
+        if (args.length >= fn.length) {
+            return fn.apply(null, args)
+        }
+        return curry(
+            fn.bind(null, ...args)
+        )
+    }
 }
 
-export function replaceTagArg(str: string, fn: Function) {
-    return str.replace(/(?:<!--)?__ARG__(\d+)(?:-->)?/g, fn)
+export function compose(...fns: Function[]) {
+    fns = fns.reverse();
+    return (...args: any[]) => fns.reduce((res: any, fn) => Array.isArray(res) ? fn.apply(null, res) : fn(res), args)
 }
 
-export function attributeStarts(str: string): boolean {
-    return str.trim().slice(-2) === `="`
+export function not(value: any) {
+    return !Boolean(value)
 }
