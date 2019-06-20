@@ -9,6 +9,7 @@
             xChatActions.sendMessage(
                 name + "(svelte)",
                 text,
+                "left"
             )
         );
 

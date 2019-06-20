@@ -1,15 +1,16 @@
 import {createActions, handleActions} from "redux-actions";
-import {XChatMessage, XChatState} from "~/demo/modules/x-chat/data/models";
+import {XChatMessage, XChatMessageSide, XChatState} from "~/demo/modules/x-chat/data/models";
 import {X_CHAT_KEY} from "~/demo/modules/x-chat/data/constants";
 
 export const xChatActions = createActions({
-    SEND_MESSAGE: (from: string, text: string) => ({ from, text })
+    SEND_MESSAGE: (from: string, text: string, side: XChatMessageSide) => ({ from, text, side })
 });
 
 interface SendMessagePayload {
     payload: {
         from: string,
-        text: string
+        text: string,
+        side: XChatMessageSide,
     }
 }
 
@@ -21,6 +22,7 @@ export const xChatReducer = handleActions({
                 state.messages.length + 1,
                 payload.from,
                 payload.text,
+                payload.side,
             )
         )
     }),

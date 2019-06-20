@@ -39,7 +39,11 @@ class Display extends React.Component {
 
     renderMessage(message: XChatMessage) {
         return (
-            <Message>
+            <Message
+                style={{
+                    float: message.side,
+                }}
+            >
                 <Title>{message.from}:</Title>
                 <span>{message.text}</span>
             </Message>
@@ -67,13 +71,14 @@ const Wrapper = styled.div`
     max-width: 400px;
     border: 1px solid #eee;
     height: 450px;
+    padding: 10px;
+    box-sizing: border-box;
 `;
 
 const Message = styled.div`
     border-radius: 30px;
     background-color: aliceblue;
     padding: 10px 20px;
-    margin-left: 10px;
     display: inline-block;
     line-height: 1em;
 `;
