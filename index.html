@@ -10,11 +10,16 @@
     </style>
 </head>
 <body>
-    <div class="display-flex">
-        <div>
-            current time:&nbsp;
-        </div>
-        <x-clock></x-clock>
-    </div>
+<navigation>
+    <ul>
+        <li>
+            <x-link href="/clock" >clock (react)</x-link>
+        </li>
+    </ul>
+</navigation>
+
+<section>
+    <x-content id="main" default="main" ></x-content>
+</section>
 </body>
 </html>

@@ -1,0 +1,1 @@
+/// <reference path="./src/framework/globals.d.ts" />

@@ -19,7 +19,7 @@ class Clock extends React.Component {
     state = {
         time: new Date(),
     };
-    interval: NodeJS.Timeout;
+    interval: number;
 
     componentDidMount(): void {
         this.interval = setInterval(() => {

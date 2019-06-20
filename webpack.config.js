@@ -1,4 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
+const WriteFilePlugin = require('write-file-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -15,13 +17,18 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: 'index.html',
             inject: 'head',
-        })
+        }),
+        new CopyPlugin([
+            { from: 'src/demo/pages', to: '.' }
+        ]),
+        new WriteFilePlugin(),
     ],
 
     devServer: {
         contentBase: path.join(__dirname, 'dist'),
         compress: true,
-        port: 3000
+        port: 3000,
+        historyApiFallback: true
     },
 
     // Enable sourcemaps for debugging webpack's output.
