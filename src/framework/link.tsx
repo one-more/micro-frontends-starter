@@ -14,12 +14,16 @@ export class XLink extends Component {
         return this.getAttribute("href")
     }
 
+    get text(): string {
+        return this.getAttribute("text")
+    }
+
     render(root: HTMLDivElement) {
         render(
             <Link
                 href={this.href}
             >
-                <slot />
+                {this.text}
             </Link>,
             root,
         )
@@ -29,7 +33,7 @@ export class XLink extends Component {
 class Link extends React.Component {
     props: {
         href: string,
-        children: HTMLProps<HTMLSlotElement>,
+        children: string,
     };
 
     onClick = (event: SyntheticEvent) =>  {

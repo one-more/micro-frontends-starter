@@ -7,19 +7,35 @@
         .display-flex {
             display: flex;
         }
+
+        .padding-top-1em {
+            padding-block-start: 1em;
+        }
+
+        .svelte-clock{
+            width: 300px;
+            height: 300px;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+        }
     </style>
 </head>
 <body>
-<navigation>
-    <ul>
-        <li>
-            <x-link href="/clock" >clock (react)</x-link>
-        </li>
-    </ul>
-</navigation>
+    <main>
+        <navigation>
+            <ul>
+                <li>
+                    <x-link href="/clock" text="clock (react & svelte)" ></x-link>
+                </li>
+            </ul>
+        </navigation>
 
-<section>
-    <x-content id="main" default="main" ></x-content>
-</section>
+        <section>
+            <x-content id="main" default="main" ></x-content>
+        </section>
+    </main>
 </body>
 </html>

@@ -2,9 +2,9 @@ import * as React from "react";
 import {render} from "react-dom";
 import {Component} from "../core";
 
-export class XClock extends Component {
+export class XClockReact extends Component {
     static getName(): string {
-        return 'x-clock'
+        return 'x-clock-react'
     }
 
     render(root: HTMLDivElement) {

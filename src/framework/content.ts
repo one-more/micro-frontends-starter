@@ -107,7 +107,8 @@ export class XContent extends Component {
     insertContent(root: ShadowRoot | HTMLDivElement, content: Element) {
         if (content) {
             root.innerHTML = "";
-            root.appendChild(content)
+            content.removeAttribute("id");
+            root.appendChild(content);
         }
     }
 }

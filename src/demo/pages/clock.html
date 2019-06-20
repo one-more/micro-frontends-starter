@@ -1,6 +1,13 @@
-<div id="main" class="display-flex">
-    <div>
-        current time:&nbsp;
+<div id="main" class="padding-top-1em">
+    <div class="display-flex ">
+        <div>
+            React:&nbsp;
+        </div>
+        <x-clock-react></x-clock-react>
     </div>
-    <x-clock></x-clock>
+    <br>
+    <div class="svelte-clock">
+        <div>Svelte:</div>
+        <x-clock-svelte></x-clock-svelte>
+    </div>
 </div>

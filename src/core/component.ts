@@ -7,17 +7,16 @@ export class Component extends HTMLElement {
         return [];
     }
 
-    isShadow: boolean = true;
+    isShadow: boolean = false;
     root: HTMLDivElement;
 
-    constructor() {
-        super();
-
+    createRoot() {
         if (this.isShadow) {
             this.attachShadow({mode: 'open'})
         } else {
             this.root = document.createElement('div');
             this.root.style.display = 'contents';
+            this.appendChild(this.root);
         }
     }
 
@@ -34,13 +33,14 @@ export class Component extends HTMLElement {
     render(root: ShadowRoot | HTMLDivElement) {}
 
     callRender(): void {
+        this.beforeRender();
         this.render(this.isShadow ? this.shadowRoot : this.root);
+        this.afterRender();
     }
 
     connectedCallback() {
-        this.beforeRender();
+        this.createRoot();
         this.callRender();
-        this.afterRender();
 
         this.connected()
     }
