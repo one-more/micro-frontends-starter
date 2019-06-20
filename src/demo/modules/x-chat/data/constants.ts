@@ -1,0 +1,1 @@
+export const X_CHAT_KEY = "x-chat";

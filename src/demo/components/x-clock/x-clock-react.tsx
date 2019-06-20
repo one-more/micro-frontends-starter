@@ -1,6 +1,6 @@
 import * as React from "react";
 import {render} from "react-dom";
-import {Component} from "../core";
+import {Component} from "~/core";
 
 export class XClockReact extends Component {
     static getName(): string {

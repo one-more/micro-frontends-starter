@@ -1,4 +1,4 @@
-import {Component} from "../core";
+import {Component} from "~/core";
 import Clock from "./clock.svelte";
 
 export class XClockSvelte extends Component {

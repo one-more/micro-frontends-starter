@@ -59,5 +59,8 @@ class Link extends React.Component {
 }
 
 const StyledLink = styled.a`
-    
+    color: blue;
+    &:visited {
+        color: blue;
+    }
 `;
