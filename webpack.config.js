@@ -1,6 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const WriteFilePlugin = require('write-file-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const path = require('path');
 
 module.exports = {
@@ -22,6 +23,7 @@ module.exports = {
             { from: 'src/demo/pages', to: '.' }
         ]),
         new WriteFilePlugin(),
+        new VueLoaderPlugin(),
     ],
 
     devServer: {
@@ -31,20 +33,18 @@ module.exports = {
         historyApiFallback: true
     },
 
-    // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
 
     resolve: {
-        // Add '.ts' and '.tsx' as resolvable extensions.
-        extensions: [".ts", ".tsx", ".mjs", ".js", ".json"],
+        extensions: [".ts", ".tsx", ".mjs", ".js", ".json", ".svelte", ".vue"],
         alias: {
             '~': path.resolve(__dirname, 'src/'),
+            'vue$': 'vue/dist/vue.esm.js',
         }
     },
 
     module: {
         rules: [
-            // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
             {
                 test: /\.tsx?$/,
                 loader: "awesome-typescript-loader",
@@ -60,13 +60,17 @@ module.exports = {
                 }
             },
 
-            // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
             { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
 
             {
                 test: /\.svelte$/,
                 exclude: /node_modules/,
                 use: 'svelte-loader'
+            },
+
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
             }
         ]
     },

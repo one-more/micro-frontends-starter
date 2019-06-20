@@ -39,14 +39,17 @@ class Display extends React.Component {
 
     renderMessage(message: XChatMessage) {
         return (
-            <Message
+            <div
                 style={{
-                    float: message.side,
+                    textAlign: message.side
                 }}
+                key={message.id}
             >
-                <Title>{message.from}:</Title>
-                <span>{message.text}</span>
-            </Message>
+                <Message>
+                    <Title>{message.from}:</Title>
+                    <span>{message.text}</span>
+                </Message>
+            </div>
         )
     }
 
@@ -81,6 +84,7 @@ const Message = styled.div`
     padding: 10px 20px;
     display: inline-block;
     line-height: 1em;
+    text-align: left;
 `;
 
 const Title = styled.p`
