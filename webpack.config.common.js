@@ -1,5 +1,4 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyPlugin = require('copy-webpack-plugin');
 const WriteFilePlugin = require('write-file-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -8,8 +7,6 @@ const path = require('path');
 module.exports = {
     entry: {
         main: "./src/index.ts",
-        clock: "./src/demo/pages/clock.ts",
-        chat: "./src/demo/pages/chat.ts",
     },
 
     output: {
@@ -39,7 +36,7 @@ module.exports = {
     },
 
     performance: {
-        maxEntrypointSize: 400000
+        maxEntrypointSize: 400000,
     },
 
     plugins: [
@@ -48,9 +45,6 @@ module.exports = {
             template: 'index.html',
             inject: false,
         }),
-        new CopyPlugin([
-            { from: 'src/demo/pages/*.html', to: '.', flatten: true }
-        ]),
         new WriteFilePlugin(),
         new VueLoaderPlugin(),
     ],
