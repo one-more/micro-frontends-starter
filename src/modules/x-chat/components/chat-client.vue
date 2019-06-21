@@ -27,8 +27,8 @@
 </template>
 
 <script>
-    import {store} from "~/demo/store";
-    import {xChatActions} from "~/demo/modules/x-chat";
+    import {store} from "~/store";
+    import {xChatActions} from "~/modules/x-chat";
 
     export default {
         data() {

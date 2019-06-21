@@ -1,6 +1,6 @@
 import {createActions, handleActions} from "redux-actions";
-import {XChatMessage, XChatMessageSide, XChatState} from "~/demo/modules/x-chat/data/models";
-import {X_CHAT_KEY} from "~/demo/modules/x-chat/data/constants";
+import {XChatMessage, XChatMessageSide, XChatState} from "~/modules/x-chat/data/models";
+import {X_CHAT_KEY} from "~/modules/x-chat/data/constants";
 
 const PERSIST_KEY = "x-chat-persist";
 

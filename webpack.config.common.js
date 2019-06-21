@@ -8,8 +8,8 @@ const path = require('path');
 module.exports = {
     entry: {
         main: "./src/index.ts",
-        clock: "./src/demo/pages/clock.ts",
-        chat: "./src/demo/pages/chat.ts",
+        clock: "./src/pages/clock.ts",
+        chat: "./src/pages/chat.ts",
     },
 
     output: {
@@ -49,7 +49,7 @@ module.exports = {
             inject: false,
         }),
         new CopyPlugin([
-            { from: 'src/demo/pages/*.html', to: '.', flatten: true }
+            { from: 'src/pages/*.html', to: '.', flatten: true }
         ]),
         new WriteFilePlugin(),
         new VueLoaderPlugin(),

@@ -1,5 +1,5 @@
 import {createStore, combineReducers, Unsubscribe} from "redux";
-import {xChatReducers} from "~/demo/modules/x-chat";
+import {xChatReducers} from "~/modules/x-chat";
 
 export const store = createStore(
     combineReducers({

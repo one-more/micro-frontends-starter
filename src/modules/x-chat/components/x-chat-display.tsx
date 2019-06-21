@@ -1,9 +1,9 @@
 import {Component} from "~/core";
 import * as React from "react"
 import styled from "styled-components"
-import {XChatMessage, XChatState} from "~/demo/modules/x-chat/data/models";
-import {xChatStateSelector} from "~/demo/modules/x-chat/data/selectors";
-import {store, subscribeWithSelector} from "~/demo/store";
+import {XChatMessage, XChatState} from "~/modules/x-chat/data/models";
+import {xChatStateSelector} from "~/modules/x-chat/data/selectors";
+import {store, subscribeWithSelector} from "~/store";
 import {Unsubscribe} from "redux";
 import {RefObject} from "react";
 import {renderReact} from "~/framework";
@@ -83,7 +83,7 @@ class Display extends React.Component {
 }
 
 const Wrapper = styled.div`
-    width: 30vw;
+    width: auto;
     max-width: 400px;
     border: 1px solid #eee;
     height: 450px;

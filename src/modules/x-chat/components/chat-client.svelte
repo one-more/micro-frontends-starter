@@ -1,6 +1,6 @@
 <script>
-    import {store} from "~/demo/store";
-    import {xChatActions} from "~/demo/modules/x-chat";
+    import {store} from "~/store";
+    import {xChatActions} from "~/modules/x-chat";
 
     function handleSubmit(event) {
         event.preventDefault();
