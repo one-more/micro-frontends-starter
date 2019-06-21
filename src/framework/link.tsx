@@ -2,8 +2,9 @@ import * as React from "react"
 import {Component} from "~/core";
 import styled from "styled-components"
 import {SyntheticEvent} from "react";
-import {pushState} from "./history";
+import {addHistoryChangeListener, pushState} from "./history";
 import {renderReact} from "~/framework/render-react";
+import {Subscription} from "~/framework/models";
 
 export class XLink extends Component {
     static getName(): string {
@@ -18,14 +19,25 @@ export class XLink extends Component {
         return this.getAttribute("text")
     }
 
+    subscription: Subscription;
+
     render(root: HTMLDivElement) {
         renderReact(
             <Link
                 href={this.href}
+                className={
+                    this.href == location.pathname ? "active" : ""
+                }
             >
                 {this.text}
             </Link>,
             root,
+        )
+    }
+
+    connected() {
+        this.subscription = addHistoryChangeListener(
+            () => this.update()
         )
     }
 }
@@ -34,6 +46,7 @@ class Link extends React.Component {
     props: {
         href: string,
         children: string,
+        className: string,
     };
 
     onClick = (event: SyntheticEvent) =>  {
@@ -51,6 +64,7 @@ class Link extends React.Component {
             <StyledLink
                 onClick={this.onClick}
                 href={this.props.href}
+                className={this.props.className}
             >
                 {this.props.children}
             </StyledLink>
@@ -62,5 +76,10 @@ const StyledLink = styled.a`
     color: blue;
     &:visited {
         color: blue;
+    }
+    &.active, &.active:visited, &.active:hover {
+        color: #414141;
+        cursor: default;
+        text-decoration: none;
     }
 `;
