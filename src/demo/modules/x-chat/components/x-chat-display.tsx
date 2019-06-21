@@ -1,11 +1,12 @@
 import {Component} from "~/core";
 import * as React from "react"
-import {render} from "react-dom";
 import styled from "styled-components"
 import {XChatMessage, XChatState} from "~/demo/modules/x-chat/data/models";
 import {xChatStateSelector} from "~/demo/modules/x-chat/data/selectors";
 import {store, subscribeWithSelector} from "~/demo/store";
 import {Unsubscribe} from "redux";
+import {RefObject} from "react";
+import {renderReact} from "~/framework";
 
 export class XChatDisplay extends Component {
     static getName(): string {
@@ -13,7 +14,7 @@ export class XChatDisplay extends Component {
     }
 
     render(root: HTMLDivElement) {
-        render(
+        renderReact(
             <Display />,
             root,
         )
@@ -29,9 +30,11 @@ class Display extends React.Component {
 
     unsubscribe: Unsubscribe;
 
+    wrapper: RefObject<HTMLDivElement> = React.createRef();
+
     render(): React.ReactElement<any, string | React.JSXElementConstructor<any>> | string | number | {} | React.ReactNodeArray | React.ReactPortal | boolean | null | undefined {
         return (
-            <Wrapper>
+            <Wrapper ref={this.wrapper} >
                 {this.state.messages.map(this.renderMessage)}
             </Wrapper>
         )
@@ -53,7 +56,17 @@ class Display extends React.Component {
         )
     }
 
+    scrollToBottom() {
+        const wrapper = this.wrapper.current;
+        wrapper.scrollTop = wrapper.scrollHeight
+    }
+
+    componentDidUpdate(): void {
+        this.scrollToBottom();
+    }
+
     componentDidMount(): void {
+        this.scrollToBottom();
         this.unsubscribe = subscribeWithSelector(
             xChatStateSelector,
             () => {
@@ -76,6 +89,7 @@ const Wrapper = styled.div`
     height: 450px;
     padding: 10px;
     box-sizing: border-box;
+    overflow: auto;
 `;
 
 const Message = styled.div`
@@ -85,6 +99,7 @@ const Message = styled.div`
     display: inline-block;
     line-height: 1em;
     text-align: left;
+    margin: 5px 0;
 `;
 
 const Title = styled.p`

@@ -1,8 +1,6 @@
 import {Component} from "~/core";
-import Vue from 'vue'
 import ChatClient from "./chat-client.vue"
-
-Vue.config.productionTip = false;
+import {renderVue} from "~/framework";
 
 export class XChatClientVue extends Component {
     static getName(): string {
@@ -10,10 +8,9 @@ export class XChatClientVue extends Component {
     }
 
     render(root: HTMLDivElement) {
-        new Vue({
-            el: root,
-            template: "<ChatClient />",
-            components: { ChatClient }
-        })
+        renderVue(
+            ChatClient,
+            root,
+        )
     }
 }

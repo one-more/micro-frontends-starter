@@ -1,6 +1,6 @@
 import * as React from "react";
-import {render} from "react-dom";
 import {Component} from "~/core";
+import {renderReact} from "~/framework";
 
 export class XClockReact extends Component {
     static getName(): string {
@@ -8,7 +8,7 @@ export class XClockReact extends Component {
     }
 
     render(root: HTMLDivElement) {
-        render(
+        renderReact(
             <Clock />,
             root,
         )

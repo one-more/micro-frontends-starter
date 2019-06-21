@@ -4,7 +4,8 @@
   "description": "architectural js framework",
   "main": "dist/bundle.js",
   "scripts": {
-    "start": "webpack-dev-server --open"
+    "start": "webpack-dev-server --open",
+    "build": "webpack --config webbpack.config.production.js"
   },
   "repository": {
     "type": "git",
@@ -21,12 +22,15 @@
     "url": "https://github.com/one-more/muskot/issues"
   },
   "homepage": "https://github.com/one-more/muskot#readme",
+  "sideEffects": false,
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "@types/redux-actions": "^2.6.1",
     "@types/styled-components": "^4.1.16",
     "awesome-typescript-loader": "^5.2.1",
+    "clean-webpack-plugin": "^3.0.0",
+    "compression-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.0.3",
     "html-webpack-plugin": "^3.2.0",
     "redux": "^4.0.1",
@@ -38,8 +42,10 @@
     "vue-loader": "^15.7.0",
     "vue-template-compiler": "^2.6.10",
     "webpack": "^4.34.0",
+    "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.4",
     "webpack-dev-server": "^3.7.1",
+    "webpack-merge": "^4.2.1",
     "write-file-webpack-plugin": "^4.5.0"
   },
   "dependencies": {

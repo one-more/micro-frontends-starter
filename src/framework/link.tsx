@@ -1,9 +1,9 @@
 import * as React from "react"
-import {render} from "react-dom";
-import {Component} from "../core";
+import {Component} from "~/core";
 import styled from "styled-components"
-import {HTMLProps, SyntheticEvent} from "react";
+import {SyntheticEvent} from "react";
 import {pushState} from "./history";
+import {renderReact} from "~/framework/render-react";
 
 export class XLink extends Component {
     static getName(): string {
@@ -19,7 +19,7 @@ export class XLink extends Component {
     }
 
     render(root: HTMLDivElement) {
-        render(
+        renderReact(
             <Link
                 href={this.href}
             >
