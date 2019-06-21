@@ -1,4 +1,4 @@
-# use multiple frameworks in one app with web-components
+# micro-frontends started configured to use multiple frameworks
 
 extend skeleton `Component` class with one that renders content with particular framework
 ````es6
@@ -43,4 +43,12 @@ class Clock extends React.Component {
         )
     }
 }
+````
+then define component 
+````es6
+define(XClock)
+````
+and use in markup
+````
+<x-clock></x-clock> 
 ````
