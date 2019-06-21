@@ -46,7 +46,7 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             template: 'index.html',
-            inject: 'head',
+            inject: false,
         }),
         new CopyPlugin([
             { from: 'src/demo/pages/*.html', to: '.', flatten: true }

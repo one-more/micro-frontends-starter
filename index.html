@@ -44,6 +44,11 @@
             grid-template-columns: repeat(3, 1fr);
         }
     </style>
+    <% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
+        <% if ( (htmlWebpackPlugin.files.chunks[chunk].entry).match('vendor') || (htmlWebpackPlugin.files.chunks[chunk].entry).match('main') ) {%>
+            <script src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script>
+        <% } %>
+    <% } %>
 </head>
 <body>
     <main>

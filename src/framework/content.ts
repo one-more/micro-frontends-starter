@@ -1,6 +1,7 @@
 import {Component, retrieve, store} from "../core";
 import {Subscription} from "./models";
 import {addHistoryChangeListener} from "./history";
+import {instanceOf} from "prop-types";
 
 const pageLoadingKey = Symbol("pageLoading");
 const loadingPromiseKey = Symbol("pageLoadingPromise");
@@ -82,6 +83,13 @@ export class XContent extends Component {
 
                     const tpl: HTMLTemplateElement = document.createElement("template");
                     tpl.innerHTML = data;
+
+                    const scripts = tpl.content.querySelectorAll("script");
+                    Array.from(scripts).forEach(el => {
+                        const script = document.createElement("script");
+                        script.src = el.src;
+                        document.head.appendChild(script);
+                    });
 
                     store(this.contentKey, tpl)
                 })
