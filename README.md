@@ -1,4 +1,4 @@
-# micro-frontends started configured to use multiple frameworks
+# micro-frontends starter configured to use multiple frameworks
 
 extend skeleton `Component` class with one that renders content with particular framework
 ````es6
