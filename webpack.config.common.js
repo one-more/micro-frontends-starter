@@ -1,110 +1,44 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const WriteFilePlugin = require('write-file-webpack-plugin');
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const merge = require('webpack-merge');
+const commonConfig = require("@micro-frontends/config/webpack.config.common");
 const path = require('path');
 
-module.exports = {
-    entry: {
-        main: "./src/index.ts",
-        clock: "./src/pages/clock.ts",
-        chat: "./src/pages/chat.ts",
-        todo: "./src/pages/todo.ts",
-    },
-
-    output: {
-        path: __dirname + "/dist",
-        filename: '[name].bundle.js',
-        chunkFilename: '[name].bundle.js',
-        publicPath: '/',
-    },
-
-    optimization: {
-        usedExports: true,
-        runtimeChunk: {
-            name: "vendor"
+module.exports = merge(
+    commonConfig,
+    {
+        entry: {
+            main: "./src/index.ts",
+            clock: "./src/pages/clock.ts",
+            chat: "./src/pages/chat.ts",
+            todo: "./src/pages/todo.ts",
         },
-        splitChunks: {
-            cacheGroups: {
-                vendors: {
-                    test: /[\\/]node_modules[\\/]/,
-                    name: 'vendors',
-                    enforce: true,
-                    chunks: 'all',
-                    minSize: 100000,
-                    maxSize: 244000,
-                }
-            },
+
+        output: {
+            path: __dirname + "/dist",
+            filename: '[name].bundle.js',
+            chunkFilename: '[name].bundle.js',
+            publicPath: '/',
         },
-    },
 
-    performance: {
-        maxEntrypointSize: 400000
-    },
+        resolve: {
+            alias: {
+                '~': path.resolve(__dirname, 'src/'),
+            }
+        },
 
-    plugins: [
-        new CleanWebpackPlugin(),
-        new HtmlWebpackPlugin({
-            template: 'index.html',
-            inject: false,
-        }),
-        new CopyPlugin([
-            { from: 'src/pages/*.html', to: '.', flatten: true }
-        ]),
-        new WriteFilePlugin(),
-        new VueLoaderPlugin(),
-    ],
-
-    resolve: {
-        extensions: [".ts", ".tsx", ".mjs", ".js", ".json", ".svelte", ".vue"],
-        alias: {
-            '~': path.resolve(__dirname, 'src/'),
-            'vue$': 'vue/dist/vue.runtime.esm.js',
-        }
-    },
-
-    module: {
-        rules: [
-            {
-                test: /\.tsx?$/,
-                loader: "awesome-typescript-loader",
-                options: {
-                    "useBabel": true,
-                    "babelOptions": {
-                        "babelrc": true,
-                        "presets": [
-                            ["@babel/preset-env", { "targets": "last 2 versions, ie 11", "modules": false }]
-                        ]
-                    },
-                    "babelCore": "@babel/core",
-                }
-            },
-
-            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
-
-            {
-                test: /\.svelte$/,
-                exclude: /node_modules/,
-                use: 'svelte-loader'
-            },
-
-            {
-                test: /\.vue$/,
-                loader: 'vue-loader'
-            },
-
-            {
-                test: /\.imba$/,
-                loader: 'imba/loader'
-            },
-
-            { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
-
-            {
-                test: /\.css$/,
-                use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
-            },
-        ]
-    },
-};
+        plugins: [
+            new CleanWebpackPlugin(),
+            new HtmlWebpackPlugin({
+                template: 'index.html',
+                inject: false,
+            }),
+            new CopyPlugin([
+                { from: 'src/pages/*.html', to: '.', flatten: true }
+            ]),
+            new WriteFilePlugin(),
+        ],
+    }
+);

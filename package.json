@@ -1,8 +1,8 @@
 {
-  "name": "muskot",
+  "name": "micro-frontends-starter",
   "version": "1.0.0",
-  "description": "architectural js framework",
-  "main": "dist/bundle.js",
+  "description": "",
+  "main": "",
   "scripts": {
     "start": "webpack-dev-server --open",
     "build": "webpack --config webbpack.config.production.js",
@@ -10,24 +10,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/one-more/muskot.git"
+    "url": "https://github.com/one-more/micro-frontends-starter.git"
   },
   "keywords": [
-    "framework",
-    "js",
-    "architecture"
+    "micro-frontends"
   ],
   "author": "one-more",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/one-more/muskot/issues"
+    "url": "https://github.com/one-more/micro-frontends-starter.git/issues"
   },
-  "homepage": "https://github.com/one-more/muskot#readme",
+  "homepage": "https://github.com/one-more/micro-frontends-starter.git#readme",
   "sideEffects": false,
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
+    "@micro-frontends/config": "^1.0.4",
     "@types/redux-actions": "^2.6.1",
     "@types/styled-components": "^4.1.16",
     "awesome-typescript-loader": "^5.2.1",
@@ -46,7 +45,6 @@
     "styled-components": "^4.3.1",
     "svelte-loader": "^2.13.4",
     "typescript": "^3.5.2",
-    "vue-loader": "^15.7.0",
     "vue-template-compiler": "^2.6.10",
     "webpack": "^4.34.0",
     "webpack-bundle-analyzer": "^3.3.2",
@@ -61,6 +59,7 @@
     "@types/react": "^16.8.20",
     "@types/react-dom": "^16.8.4",
     "@webcomponents/custom-elements": "^1.2.0",
+    "babel-merge": "^3.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "svelte": "^3.5.3",
