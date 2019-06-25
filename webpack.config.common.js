@@ -10,6 +10,7 @@ module.exports = {
         main: "./src/index.ts",
         clock: "./src/pages/clock.ts",
         chat: "./src/pages/chat.ts",
+        todo: "./src/pages/todo.js",
     },
 
     output: {
@@ -91,7 +92,19 @@ module.exports = {
             {
                 test: /\.vue$/,
                 loader: 'vue-loader'
-            }
+            },
+
+            {
+                test: /\.imba$/,
+                loader: 'imba/loader'
+            },
+
+            { test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
+
+            {
+                test: /\.css$/,
+                use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
+            },
         ]
     },
 };
