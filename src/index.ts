@@ -1,6 +1,6 @@
-import {define} from "./core";
-import {XLink} from "./framework";
-import {XContent} from "./framework";
+import {define} from "@micro-frontends/core";
+import {XLink} from "@micro-frontends/framework";
+import {XContent} from "@micro-frontends/framework";
 
 define(XLink);
 define(XContent);

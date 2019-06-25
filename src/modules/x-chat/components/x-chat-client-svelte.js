@@ -1,4 +1,4 @@
-import {Component} from "~/core";
+import {Component} from "@micro-frontends/core";
 import Client from "./chat-client.svelte"
 
 export class XChatClientSvelte extends Component {

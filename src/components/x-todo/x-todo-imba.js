@@ -1,5 +1,5 @@
 import {start} from './todo.imba';
-import {Component} from "~/core";
+import {Component} from "@micro-frontends/core";
 import "./imba-todo.css";
 
 export class XTODOImba extends Component {

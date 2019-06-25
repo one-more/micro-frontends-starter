@@ -1,4 +1,4 @@
-import {Component} from "~/core";
+import {Component} from "@micro-frontends/core";
 import * as React from "react"
 import styled from "styled-components"
 import {XChatMessage, XChatState} from "~/modules/x-chat/data/models";
@@ -6,7 +6,7 @@ import {xChatStateSelector} from "~/modules/x-chat/data/selectors";
 import {store, subscribeWithSelector} from "~/store";
 import {Unsubscribe} from "redux";
 import {RefObject} from "react";
-import {renderReact} from "~/framework";
+import {renderReact} from "@micro-frontends/framework";
 
 export class XChatDisplay extends Component {
     static getName(): string {

@@ -1,6 +1,6 @@
 import * as React from "react";
-import {Component} from "~/core";
-import {renderReact} from "~/framework";
+import {Component} from "@micro-frontends/core";
+import {renderReact} from "@micro-frontends/framework";
 
 export class XClockReact extends Component {
     static getName(): string {

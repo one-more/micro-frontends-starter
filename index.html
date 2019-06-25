@@ -45,6 +45,12 @@
             grid-column-gap: 20px;
             margin-right: 20px;
         }
+
+        .x-link.active {
+            color: #414141;
+            cursor: default;
+            text-decoration: none;
+        }
     </style>
     <% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
         <% if ( (htmlWebpackPlugin.files.chunks[chunk].entry).match('vendor') || (htmlWebpackPlugin.files.chunks[chunk].entry).match('main') ) {%>
