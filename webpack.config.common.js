@@ -10,7 +10,7 @@ module.exports = {
         main: "./src/index.ts",
         clock: "./src/pages/clock.ts",
         chat: "./src/pages/chat.ts",
-        todo: "./src/pages/todo.js",
+        todo: "./src/pages/todo.ts",
     },
 
     output: {
