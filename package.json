@@ -23,7 +23,7 @@
   "homepage": "https://github.com/one-more/micro-frontends-starter.git#readme",
   "sideEffects": false,
   "devDependencies": {
-    "@micro-frontends/config": "^1.0.6",
+    "@micro-frontends/config": "^1.0.7",
     "@types/redux-actions": "^2.6.1",
     "@types/styled-components": "^4.1.16",
     "babel-merge": "^3.0.0",
