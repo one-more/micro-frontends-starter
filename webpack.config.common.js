@@ -9,13 +9,6 @@ const path = require('path');
 module.exports = merge(
     commonConfig,
     {
-        entry: {
-            main: "./src/index.ts",
-            clock: "./src/pages/clock.ts",
-            chat: "./src/pages/chat.ts",
-            todo: "./src/pages/todo.ts",
-        },
-
         output: {
             path: __dirname + "/dist",
             filename: '[name].bundle.js',
