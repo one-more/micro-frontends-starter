@@ -4,7 +4,7 @@
   "description": "",
   "main": "",
   "scripts": {
-    "start": "webpack-dev-server --open",
+    "start": "micro-frontends-start",
     "build": "webpack --config webbpack.config.production.js",
     "deploy": "build && deploy-gh-pages dist --local"
   },
@@ -37,6 +37,7 @@
   "dependencies": {
     "@micro-frontends/core": "^1.0.8",
     "@micro-frontends/framework": "^1.0.6",
+    "@micro-frontends/scripts": "^1.0.4",
     "document-register-element": "^1.13.2",
     "redux": "^4.0.1",
     "redux-actions": "^2.6.5",
