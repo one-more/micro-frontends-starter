@@ -4,7 +4,7 @@
   "description": "micro-frontends starter",
   "main": "src/index.ts",
   "scripts": {
-    "start": "webpack-dev-server --open",
+    "start": "micro-frontends-start",
     "build": "webpack --config webbpack.config.production.js"
   },
   "repository": {
@@ -22,17 +22,14 @@
   "homepage": "https://github.com/one-more/micro-frontends-starter.git#readme",
   "sideEffects": false,
   "devDependencies": {
-      "@micro-frontends/config": "^1.0.7",
-      "babel-merge": "^3.0.0",
-      "clean-webpack-plugin": "^3.0.0",
-      "copy-webpack-plugin": "^5.0.3",
-      "html-webpack-plugin": "^3.2.0",
-      "webpack-merge": "^4.2.1",
-      "write-file-webpack-plugin": "^4.5.0"
+    "@micro-frontends/config": "^1.0.13",
+    "babel-merge": "^3.0.0",
+    "webpack-merge": "^4.2.1",
+    "@micro-frontends/scripts": "^1.0.4"
   },
   "dependencies": {
-    "@micro-frontends/core": "^1.0.8",
-    "@micro-frontends/framework": "^1.0.6",
+    "@micro-frontends/core": "^1.0.11",
+    "@micro-frontends/framework": "^1.0.9",
     "document-register-element": "^1.13.2"
   }
 }
