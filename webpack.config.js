@@ -1,16 +1,4 @@
-const path = require('path');
 const merge = require('webpack-merge');
-const baseConfig = require('./webpack.config.common');
+const baseConfig = require('@micro-frontends/config/webpack.config.dev');
 
-module.exports = merge(baseConfig, {
-    mode: "development",
-
-    devServer: {
-        contentBase: path.join(__dirname, 'dist'),
-        compress: true,
-        port: 3000,
-        historyApiFallback: true
-    },
-
-    devtool: "source-map",
-});
+module.exports = merge(baseConfig, {});
