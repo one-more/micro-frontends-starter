@@ -22,14 +22,14 @@
   "homepage": "https://github.com/one-more/micro-frontends-starter.git#readme",
   "sideEffects": false,
   "devDependencies": {
-    "@micro-frontends/config": "^1.0.13",
+    "@micro-frontends/config": "^1.0.17",
+    "@micro-frontends/scripts": "^1.0.5",
     "babel-merge": "^3.0.0",
-    "webpack-merge": "^4.2.1",
-    "@micro-frontends/scripts": "^1.0.4"
+    "webpack-merge": "^4.2.1"
   },
   "dependencies": {
-    "@micro-frontends/core": "^1.0.11",
-    "@micro-frontends/framework": "^1.0.9",
+    "@micro-frontends/core": "^1.0.13",
+    "@micro-frontends/framework": "^1.0.11",
     "document-register-element": "^1.13.2"
   }
 }
