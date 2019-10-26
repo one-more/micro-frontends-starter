@@ -15,3 +15,14 @@ publish_packages:
 	cd $(CURDIR)/node_modules/@micro-frontends/core && npm publish && cd -
 	cd $(CURDIR)/node_modules/@micro-frontends/config && npm publish && cd -
 	cd $(CURDIR)/node_modules/@micro-frontends/framework && npm publish && cd -
+	node scripts/update-versions.js
+
+update_packages:
+	git stash
+	git checkout master
+	npx update-by-scope @micro-frontends npm install
+	git add package.json
+	git diff-index --quiet HEAD || git commit -m "update @micro-frontends packages"
+	git push
+	git checkout demo
+	git stash pop
