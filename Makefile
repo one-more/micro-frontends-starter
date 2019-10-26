@@ -18,11 +18,14 @@ publish_packages:
 	node scripts/update-versions.js
 
 update_packages:
-	git stash
+	mv node_modules node_modules_demo
+	git stash save updatepackages
 	git checkout master
 	npx update-by-scope @micro-frontends npm install
 	git add package.json
 	git diff-index --quiet HEAD || git commit -m "update @micro-frontends packages"
 	git push
 	git checkout demo
-	git stash pop
+	git stash apply stash^{/updatepackages}
+	rm -rf node_modules
+	mv node_modules_demo node_modules
