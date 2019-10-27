@@ -29,3 +29,9 @@ update_packages:
 	git stash apply stash^{/updatepackages}
 	rm -rf node_modules
 	mv node_modules_demo node_modules
+
+install_modules:
+	rm -rf node_modules
+	npm i
+
+install_deps: install_modules link_packages
