@@ -1,41 +1,38 @@
 import {Component} from "@micro-frontends/core";
 import * as React from "react"
 import styled from "styled-components"
-import {XChatMessage, XChatState} from "~/modules/x-chat/data/models";
-import {xChatStateSelector} from "~/modules/x-chat/data/selectors";
-import {store, subscribeWithSelector} from "~/store";
-import {Unsubscribe} from "redux";
+import {XChatMessage, XChatMessages, XChatState} from "../data/models";
+import {xChatStateSelector} from "../data/selectors";
+import {store} from "~/store";
 import {RefObject} from "react";
 import {renderReact} from "@micro-frontends/framework";
 
-export class XChatDisplay extends Component {
+export class XChatDisplay extends Component<XChatState> {
     static getName(): string {
         return 'x-chat-display'
     }
 
+    store = store;
+    selector = xChatStateSelector;
+
     render(root: HTMLDivElement) {
         renderReact(
-            <Display />,
+            <Display messages={this.state.messages} />,
             root,
         )
     }
 }
 
-function getState() {
-    return xChatStateSelector(store.getState());
+type DisplayProps = {
+    messages: XChatMessages
 }
-
-class Display extends React.Component {
-    state: XChatState = getState();
-
-    unsubscribe: Unsubscribe;
-
+class Display extends React.Component<DisplayProps> {
     wrapper: RefObject<HTMLDivElement> = React.createRef();
 
-    render(): React.ReactElement<any, string | React.JSXElementConstructor<any>> | string | number | {} | React.ReactNodeArray | React.ReactPortal | boolean | null | undefined {
+    render(): React.ReactElement<undefined> {
         return (
             <Wrapper ref={this.wrapper} >
-                {this.state.messages.map(this.renderMessage)}
+                {this.props.messages.map(this.renderMessage)}
             </Wrapper>
         )
     }
@@ -67,18 +64,6 @@ class Display extends React.Component {
 
     componentDidMount(): void {
         this.scrollToBottom();
-        this.unsubscribe = subscribeWithSelector(
-            xChatStateSelector,
-            () => {
-                this.setState(
-                    getState(),
-                )
-            }
-        )
-    }
-
-    componentWillUnmount(): void {
-        this.unsubscribe()
     }
 }
 

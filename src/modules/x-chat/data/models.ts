@@ -19,6 +19,8 @@ export class XChatMessage {
     }
 }
 
+export type XChatMessages = XChatMessage[]
+
 export class XChatState {
-    messages: XChatMessage[] = [];
+    messages: XChatMessages = [];
 }
