@@ -27,9 +27,6 @@
 </template>
 
 <script>
-    import {store} from "~/store";
-    import {xChatActions} from "~/modules/x-chat";
-
     export default {
         data() {
             return {
@@ -41,12 +38,10 @@
             onSubmit(event) {
                 event.preventDefault();
 
-                store.dispatch(
-                    xChatActions.sendMessage(
-                        this.name + "(vue)",
-                        this.text,
-                        "right",
-                    ),
+                this.$parent.sendMessage(
+                    this.name + "(vue)",
+                    this.text,
+                    "right",
                 );
 
                 this.text = "";
