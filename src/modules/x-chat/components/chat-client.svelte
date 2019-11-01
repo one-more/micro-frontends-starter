@@ -1,10 +1,10 @@
 <script>
-    export let actions;
+    export let sendMessage;
 
     function handleSubmit(event) {
         event.preventDefault();
 
-        actions.sendMessage(
+        sendMessage(
             name + "(svelte)",
             text,
             "left"

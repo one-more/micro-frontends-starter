@@ -1,4 +1,4 @@
-import {createStore, combineReducers, Unsubscribe} from "redux";
+import {createStore, combineReducers} from "redux";
 import {xChatReducers} from "~/modules/x-chat";
 
 export const store = createStore(
@@ -6,20 +6,3 @@ export const store = createStore(
         ...xChatReducers,
     })
 );
-
-export function subscribeWithSelector(selector: Function, cb: Function): Unsubscribe {
-    let prevValue = selector(
-        store.getState()
-    );
-    return store.subscribe(() => {
-        const newValue = selector(
-            store.getState()
-        );
-        if (newValue != prevValue) {
-            prevValue = newValue;
-            cb(
-                newValue,
-            )
-        }
-    })
-}

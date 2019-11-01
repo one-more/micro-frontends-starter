@@ -1,3 +1,5 @@
+import {X_CHAT_KEY} from "~/modules/x-chat/data/constants";
+
 export type XChatMessageSide = "left" | "right";
 
 export class XChatMessage {
@@ -24,3 +26,5 @@ export type XChatMessages = XChatMessage[]
 export class XChatState {
     messages: XChatMessages = [];
 }
+
+export type WithXChatState = { [X_CHAT_KEY]: XChatState }

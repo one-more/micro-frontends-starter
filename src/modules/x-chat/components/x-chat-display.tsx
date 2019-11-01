@@ -29,7 +29,7 @@ type DisplayProps = {
 class Display extends React.Component<DisplayProps> {
     wrapper: RefObject<HTMLDivElement> = React.createRef();
 
-    render(): React.ReactElement<undefined> {
+    render(): React.ReactChild {
         return (
             <Wrapper ref={this.wrapper} >
                 {this.props.messages.map(this.renderMessage)}
