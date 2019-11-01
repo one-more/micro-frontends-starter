@@ -2,7 +2,7 @@ import {Component} from "@micro-frontends/core";
 import {renderSvelte} from "@micro-frontends/framework"
 import Client from "./chat-client.svelte"
 import {store} from "~/store";
-import {xChatActions} from "~/modules/x-chat";
+import {xChatActions} from "../data/reducer";
 
 export class XChatClientSvelte extends Component {
     static getName() {

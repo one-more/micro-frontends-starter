@@ -1,6 +1,5 @@
 import {define} from "@micro-frontends/core";
-import {XChatClientSvelte, XChatDisplay} from "~/modules/x-chat";
-import {XChatClientVue} from "~/modules/x-chat/components/x-chat-client-vue";
+import {XChatClientSvelte, XChatDisplay, XChatClientVue} from "~/modules/x-chat";
 
 define(XChatClientSvelte);
 define(XChatDisplay);

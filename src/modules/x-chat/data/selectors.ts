@@ -1,6 +1,6 @@
-import {X_CHAT_KEY} from "~/modules/x-chat/data/constants";
-import {XChatState} from "~/modules/x-chat/data/models";
+import {X_CHAT_KEY} from "./constants";
+import {WithXChatState, XChatState} from "./models";
 
-export function xChatStateSelector(state: { [X_CHAT_KEY]: XChatState }): XChatState {
+export function xChatStateSelector(state: WithXChatState): XChatState {
     return state[X_CHAT_KEY]
 }
