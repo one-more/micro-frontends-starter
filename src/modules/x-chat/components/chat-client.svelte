@@ -1,16 +1,13 @@
 <script>
-    import {store} from "~/store";
-    import {xChatActions} from "~/modules/x-chat";
+    export let actions;
 
     function handleSubmit(event) {
         event.preventDefault();
 
-        store.dispatch(
-            xChatActions.sendMessage(
-                name + "(svelte)",
-                text,
-                "left"
-            )
+        actions.sendMessage(
+            name + "(svelte)",
+            text,
+            "left"
         );
 
         text = ""
