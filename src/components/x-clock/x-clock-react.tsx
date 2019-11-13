@@ -33,7 +33,7 @@ class Clock extends React.Component {
         clearInterval(this.interval)
     }
 
-    render(): React.ReactElement<any, string | React.JSXElementConstructor<any>> | string | number | {} | React.ReactNodeArray | React.ReactPortal | boolean | null | undefined {
+    render(): React.ReactChild {
         return (
             <div>{this.state.time.toLocaleString()}</div>
         )

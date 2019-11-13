@@ -1,5 +1,6 @@
 import {Component} from "@micro-frontends/core";
 import Clock from "./clock.svelte";
+import {renderSvelte} from "@micro-frontends/framework";
 
 export class XClockSvelte extends Component {
     static getName() {
@@ -7,8 +8,6 @@ export class XClockSvelte extends Component {
     }
 
     render(root) {
-        new Clock({
-            target: root,
-        })
+        renderSvelte(root, Clock)
     }
 }
